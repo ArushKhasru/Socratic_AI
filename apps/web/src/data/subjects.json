@@ -1,0 +1,69 @@
+[
+  {
+    "slug": "math",
+    "name": "Mathematics",
+    "description": "The study of numbers, shapes, and patterns.",
+    "icon": "📐",
+    "accent": "blue",
+    "isPermanent": true
+  },
+  {
+    "slug": "physics",
+    "name": "Physics",
+    "description": "The study of matter, energy, and the universe.",
+    "icon": "⚛️",
+    "accent": "purple",
+    "isPermanent": true
+  },
+  {
+    "slug": "chemistry",
+    "name": "Chemistry",
+    "description": "The study of substances and their reactions.",
+    "icon": "🧪",
+    "accent": "orange",
+    "isPermanent": true
+  },
+  {
+    "slug": "biology",
+    "name": "Biology",
+    "description": "The study of living organisms and life processes.",
+    "icon": "🌿",
+    "accent": "green",
+    "isPermanent": true
+  },
+  {
+    "slug": "computer-science",
+    "name": "Computer Science",
+    "description": "Computing system and software development.",
+    "icon": "💻",
+    "accent": "cyan"
+  },
+  {
+    "slug": "history",
+    "name": "History",
+    "description": "The study of past events and civilizations.",
+    "icon": "📜",
+    "accent": "brown"
+  },
+  {
+    "slug": "political-science",
+    "name": "Political Science",
+    "description": "Systems of government and political activity.",
+    "icon": "⚖️",
+    "accent": "indigo"
+  },
+  {
+    "slug": "economics",
+    "name": "Economics",
+    "description": "Production, consumption, and wealth transfer.",
+    "icon": "📈",
+    "accent": "teal"
+  },
+  {
+    "slug": "literature",
+    "name": "Literature",
+    "description": "Creative writing and literary analysis.",
+    "icon": "📚",
+    "accent": "pink"
+  }
+]

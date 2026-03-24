@@ -6,6 +6,9 @@ export interface IUserDocument extends Omit<User, '_id'>, Document {
   password: string;
   deviceTokens: string[];
   notificationsEnabled: boolean;
+  streak: number;
+  lastActivityAt?: Date;
+  subjects: string[];
 }
 
 const userSchema = new Schema<IUserDocument>(
@@ -15,6 +18,9 @@ const userSchema = new Schema<IUserDocument>(
     password: { type: String, required: true },
     deviceTokens: { type: [String], default: [] },
     notificationsEnabled: { type: Boolean, default: true },
+    streak: { type: Number, default: 0 },
+    lastActivityAt: { type: Date },
+    subjects: { type: [String], default: ['math', 'physics', 'chemistry', 'biology'] },
   },
   { timestamps: true }
 );

@@ -5,72 +5,86 @@ export interface ThemePalette {
   name: string;
   background: string;
   surface: string;
+  surfaceAlt: string;
   foreground: string;
   muted: string;
   accent: string;
+  accentSoft: string;
   border: string;
 }
 
 export const themes: Record<string, ThemePalette> = {
   nord: {
     key: 'nord',
-    name: 'Nord',
-    background: '#2E3440',
-    surface: '#3B4252',
-    foreground: '#ECEFF4',
-    muted: '#4C566A',
-    accent: '#88C0D0',
-    border: '#434C5E',
+    name: 'Nord Atelier',
+    background: '#161B26',
+    surface: '#202839',
+    surfaceAlt: '#2A3449',
+    foreground: '#ECF2FF',
+    muted: '#8A96AF',
+    accent: '#8FD3FF',
+    accentSoft: 'rgba(143, 211, 255, 0.18)',
+    border: '#31405A',
   },
   github: {
     key: 'github',
-    name: 'GitHub Dark',
-    background: '#0D1117',
-    surface: '#161B22',
-    foreground: '#C9D1D9',
-    muted: '#484F58',
-    accent: '#58A6FF',
-    border: '#30363D',
+    name: 'Midnight Graphite',
+    background: '#0C1118',
+    surface: '#131B25',
+    surfaceAlt: '#1C2633',
+    foreground: '#DCE6F2',
+    muted: '#7B8798',
+    accent: '#58B6FF',
+    accentSoft: 'rgba(88, 182, 255, 0.18)',
+    border: '#283548',
   },
   monokai: {
     key: 'monokai',
-    name: 'Monokai',
-    background: '#272822',
-    surface: '#3E3D32',
-    foreground: '#F8F8F2',
-    muted: '#75715E',
-    accent: '#A6E22E',
-    border: '#49483E',
+    name: 'Citrus Lab',
+    background: '#171714',
+    surface: '#22211C',
+    surfaceAlt: '#2D2A22',
+    foreground: '#F8F5EA',
+    muted: '#AAA184',
+    accent: '#D8F171',
+    accentSoft: 'rgba(216, 241, 113, 0.18)',
+    border: '#3C392D',
   },
   rosepine: {
     key: 'rosepine',
-    name: 'Rosé Pine',
-    background: '#191724',
-    surface: '#1F1D2E',
-    foreground: '#E0DEF4',
-    muted: '#6E6A86',
-    accent: '#C4A7E7',
-    border: '#26233A',
+    name: 'Rose Pine',
+    background: '#17141F',
+    surface: '#211C2C',
+    surfaceAlt: '#2B2439',
+    foreground: '#F1EAFE',
+    muted: '#9D91B8',
+    accent: '#F0A6CA',
+    accentSoft: 'rgba(240, 166, 202, 0.18)',
+    border: '#3A304B',
   },
   nightrunner: {
     key: 'nightrunner',
-    name: 'Night Runner',
-    background: '#111317',
-    surface: '#1A1D23',
-    foreground: '#C5CDD9',
-    muted: '#3E4451',
-    accent: '#E06C75',
-    border: '#282C34',
+    name: 'Afterglow',
+    background: '#121316',
+    surface: '#1A1D22',
+    surfaceAlt: '#242932',
+    foreground: '#E7EDF8',
+    muted: '#8A92A3',
+    accent: '#FF8A65',
+    accentSoft: 'rgba(255, 138, 101, 0.18)',
+    border: '#313845',
   },
   moonlight: {
     key: 'moonlight',
     name: 'Moonlight',
-    background: '#1E2030',
-    surface: '#2F334D',
-    foreground: '#C8D3F5',
-    muted: '#444A73',
-    accent: '#82AAFF',
-    border: '#383E5C',
+    background: '#161A2B',
+    surface: '#202744',
+    surfaceAlt: '#2A3460',
+    foreground: '#DCE5FF',
+    muted: '#95A1CE',
+    accent: '#9AC2FF',
+    accentSoft: 'rgba(154, 194, 255, 0.18)',
+    border: '#364273',
   },
 };
 
@@ -84,9 +98,11 @@ function applyTheme(palette: ThemePalette) {
   const root = document.documentElement;
   root.style.setProperty('--background', palette.background);
   root.style.setProperty('--surface', palette.surface);
+  root.style.setProperty('--surface-alt', palette.surfaceAlt);
   root.style.setProperty('--foreground', palette.foreground);
   root.style.setProperty('--muted', palette.muted);
   root.style.setProperty('--accent', palette.accent);
+  root.style.setProperty('--accent-soft', palette.accentSoft);
   root.style.setProperty('--border', palette.border);
 }
 

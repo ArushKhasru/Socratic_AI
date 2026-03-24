@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { Lato } from "next/font/google";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
 
-const spaceGrotesk = Space_Grotesk({
+const lato = Lato({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  weight: ["100", "300", "400", "700", "900"],
+  variable: "--font-lato",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${spaceGrotesk.className} h-full antialiased`}>
+      <body className={`${lato.className} ${lato.variable} h-full antialiased`}>
         <LayoutWrapper>
           {children}
         </LayoutWrapper>

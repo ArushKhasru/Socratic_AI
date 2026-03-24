@@ -9,8 +9,10 @@ export interface IMessage {
 export interface IChatDocument extends Document {
   userId: mongoose.Types.ObjectId;
   subject: string;
+  topic?: string;
   messages: IMessage[];
   isActive: boolean;
+  collaborators: { userId: mongoose.Types.ObjectId; access: 'read' | 'write' }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,8 +27,15 @@ const chatSchema = new Schema<IChatDocument>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     subject: { type: String, required: true },
+    topic: { type: String },
     messages: [messageSchema],
     isActive: { type: Boolean, default: true },
+    collaborators: [
+      {
+        userId: { type: Schema.Types.ObjectId, ref: 'User' },
+        access: { type: String, enum: ['read', 'write'], default: 'read' },
+      },
+    ],
   },
   { timestamps: true }
 );

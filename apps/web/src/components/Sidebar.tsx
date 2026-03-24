@@ -40,82 +40,76 @@ export const Sidebar = () => {
 
   return (
     <aside
-      className="fixed left-0 top-0 z-40 h-screen w-64 transition-transform sm:translate-x-0"
-      style={{
-        backgroundColor: 'var(--surface)',
-        borderRight: '1px solid var(--border)',
-      }}
+      className="panel-surface fixed top-0 left-0 z-40 h-screen w-64 overflow-hidden"
+      style={{ borderRight: '1px solid var(--border)' }}
     >
-      <div className="flex h-full flex-col px-3 py-6">
-        {/* Brand */}
+      <div className="absolute inset-x-0 top-0 h-32 opacity-70" style={{ background: 'radial-gradient(circle at top, var(--accent-soft) 0%, transparent 72%)' }} />
+      <div className="relative flex h-full flex-col px-3 py-6">
         <div className="mb-8 flex items-center px-2">
           <div
-            className="flex h-10 w-10 items-center justify-center rounded-xl"
-            style={{ backgroundColor: 'var(--accent)', color: 'var(--background)' }}
+            className="accent-halo flex h-11 w-11 items-center justify-center rounded-2xl shadow-tonal"
+            style={{ backgroundColor: 'var(--surface-alt)', color: 'var(--accent)' }}
           >
             <GraduationCap size={24} />
           </div>
-          <span className="ml-3 text-xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
-            Socratic AI
-          </span>
+          <div className="ml-3">
+            <div className="text-xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
+              Socratic AI
+            </div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--muted)' }}>
+              Guided Learning
+            </div>
+          </div>
         </div>
 
         <nav className="flex flex-1 flex-col space-y-2">
-          {/* Main Navigation */}
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
             const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                  'interactive-card reveal-up flex items-center rounded-2xl px-4 py-3 text-sm font-medium',
+                  index === 0 && 'stagger-1',
+                  index === 1 && 'stagger-2',
+                  index === 2 && 'stagger-3'
                 )}
                 style={{
-                  backgroundColor: active ? 'var(--accent)' : 'transparent',
-                  color: active ? 'var(--background)' : 'var(--muted)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!active) {
-                    e.currentTarget.style.backgroundColor = 'var(--border)';
-                    e.currentTarget.style.color = 'var(--foreground)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = 'var(--muted)';
-                  }
+                  background: active ? 'linear-gradient(135deg, var(--accent-soft), transparent)' : 'transparent',
+                  color: active ? 'var(--foreground)' : 'var(--muted)',
+                  border: `1px solid ${active ? 'color-mix(in srgb, var(--accent) 42%, var(--border))' : 'transparent'}`,
                 }}
               >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.name}
+                <item.icon className={cn('mr-3 h-5 w-5 transition-transform duration-200', active && 'scale-110')} />
+                <span className="flex-1">{item.name}</span>
+                {active && <div className="h-2 w-2 rounded-full soft-pulse" style={{ backgroundColor: 'var(--accent)' }} />}
               </Link>
             );
           })}
 
-          {/* Learn Section */}
           <div className="pt-4">
             <p
-              className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--muted)', opacity: 0.6 }}
+              className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.24em]"
+              style={{ color: 'var(--muted)', opacity: 0.7 }}
             >
               Learn
             </p>
-            <div className="space-y-1">
+            <div className="space-y-2">
               <Link
                 href="/learn"
-                className="group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+                className="interactive-card flex items-center rounded-2xl px-4 py-3 text-sm font-medium"
                 style={{
-                  backgroundColor: isLearnActive && pathname === '/learn' ? 'var(--accent)' : 'transparent',
-                  color: isLearnActive && pathname === '/learn' ? 'var(--background)' : 'var(--muted)',
+                  background: isLearnActive && pathname === '/learn' ? 'linear-gradient(135deg, var(--accent-soft), transparent)' : 'transparent',
+                  color: isLearnActive && pathname === '/learn' ? 'var(--foreground)' : 'var(--muted)',
+                  border: `1px solid ${isLearnActive && pathname === '/learn' ? 'color-mix(in srgb, var(--accent) 42%, var(--border))' : 'transparent'}`,
                 }}
               >
                 <BookOpen className="mr-3 h-5 w-5" />
                 Overview
               </Link>
 
-              <div className="ml-4 mt-2 space-y-1 pl-4" style={{ borderLeft: '1px solid var(--border)' }}>
+              <div className="ml-4 mt-2 space-y-1 rounded-2xl pl-4" style={{ borderLeft: '1px solid color-mix(in srgb, var(--accent) 22%, var(--border))' }}>
                 {subjects.map((subject) => {
                   const href = `/learn/${subject.slug}`;
                   const active = isActive(href);
@@ -123,13 +117,13 @@ export const Sidebar = () => {
                     <Link
                       key={subject.slug}
                       href={href}
-                      className="flex items-center rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                      className="interactive-card flex items-center rounded-xl px-3 py-2 text-xs font-medium"
                       style={{
-                        color: active ? 'var(--accent)' : 'var(--muted)',
-                        fontWeight: active ? '600' : '500',
+                        color: active ? 'var(--foreground)' : 'var(--muted)',
+                        backgroundColor: active ? 'var(--accent-soft)' : 'transparent',
                       }}
                     >
-                      {active && <ChevronRight className="mr-1 h-3 w-3" />}
+                      <ChevronRight className={cn('mr-1 h-3 w-3 transition-transform duration-200', active ? 'translate-x-0' : '-translate-x-1 opacity-0')} />
                       {subject.name}
                     </Link>
                   );
@@ -138,20 +132,20 @@ export const Sidebar = () => {
             </div>
           </div>
 
-          {/* Settings */}
           <div className="pt-4">
             <p
-              className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--muted)', opacity: 0.6 }}
+              className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.24em]"
+              style={{ color: 'var(--muted)', opacity: 0.7 }}
             >
               System
             </p>
             <Link
               href="/settings"
-              className="group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+              className="interactive-card flex items-center rounded-2xl px-4 py-3 text-sm font-medium"
               style={{
-                backgroundColor: isActive('/settings') ? 'var(--accent)' : 'transparent',
-                color: isActive('/settings') ? 'var(--background)' : 'var(--muted)',
+                background: isActive('/settings') ? 'linear-gradient(135deg, var(--accent-soft), transparent)' : 'transparent',
+                color: isActive('/settings') ? 'var(--foreground)' : 'var(--muted)',
+                border: `1px solid ${isActive('/settings') ? 'color-mix(in srgb, var(--accent) 42%, var(--border))' : 'transparent'}`,
               }}
             >
               <Settings className="mr-3 h-5 w-5" />
@@ -160,11 +154,17 @@ export const Sidebar = () => {
           </div>
         </nav>
 
-        {/* Footer */}
-        <div className="mt-auto rounded-xl p-4" style={{ backgroundColor: 'var(--background)' }}>
+        <div className="panel-muted mt-auto rounded-2xl p-4 accent-halo">
           <div className="flex items-center space-x-3">
-            <div className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--accent)' }} />
-            <span className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Socratic Engine Online</span>
+            <div className="h-2.5 w-2.5 rounded-full soft-pulse" style={{ backgroundColor: 'var(--accent)' }} />
+            <div>
+              <div className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
+                Socratic Engine Online
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: 'var(--muted)' }}>
+                Stable and responsive
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -15,7 +15,9 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
 
   // Define paths where Sidebar should NOT be shown
   const authPaths = ['/login', '/signup', '/signin'];
-  const showSidebar = !authPaths.some(path => pathname?.startsWith(path));
+  const chatPaths = ['/learn/'];
+  const showSidebar = !authPaths.some(path => pathname?.startsWith(path)) &&
+    !chatPaths.some(path => pathname?.startsWith(path));
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>

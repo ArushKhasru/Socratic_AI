@@ -4,6 +4,7 @@ export interface User {
   email: string;
   deviceTokens?: string[];
   notificationsEnabled?: boolean;
+  subjects?: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }

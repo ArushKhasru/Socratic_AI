@@ -4,28 +4,57 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useThemeStore, themes, type ThemePalette } from "@/store/useThemeStore";
-import { Palette, User as UserIcon, Info } from "lucide-react";
+import { Info, Palette, Sparkles, User as UserIcon } from "lucide-react";
 
-function ThemeCard({ palette, isActive, onSelect }: { palette: ThemePalette; isActive: boolean; onSelect: () => void }) {
+function ThemeCard({
+  palette,
+  isActive,
+  onSelect,
+}: {
+  palette: ThemePalette;
+  isActive: boolean;
+  onSelect: () => void;
+}) {
   return (
     <button
       onClick={onSelect}
-      className="flex flex-col items-start gap-3 p-5 rounded-2xl transition-all duration-200 text-left group"
+      className="interactive-card accent-halo reveal-up flex flex-col items-start gap-4 rounded-3xl p-5 text-left"
       style={{
-        backgroundColor: palette.surface,
-        border: isActive ? `2px solid ${palette.accent}` : `2px solid ${palette.border}`,
-        boxShadow: isActive ? `0 0 0 3px ${palette.accent}33` : 'none',
+        background: `linear-gradient(180deg, ${palette.surfaceAlt} 0%, ${palette.surface} 100%)`,
+        border: isActive ? `1px solid ${palette.accent}` : `1px solid ${palette.border}`,
+        boxShadow: isActive ? `0 0 0 3px ${palette.accentSoft}` : "none",
       }}
     >
-      {/* Color Preview Dots */}
-      <div className="flex items-center gap-1.5">
-        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: palette.background }} />
-        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: palette.accent }} />
-        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: palette.muted }} />
-        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: palette.foreground }} />
+      <div
+        className="h-24 w-full rounded-2xl"
+        style={{
+          background: `radial-gradient(circle at top right, ${palette.accentSoft} 0%, transparent 45%), linear-gradient(135deg, ${palette.background} 0%, ${palette.surfaceAlt} 50%, ${palette.surface} 100%)`,
+          border: `1px solid ${palette.border}`,
+        }}
+      />
+      <div className="flex items-center gap-2">
+        <div className="h-4 w-4 rounded-full" style={{ backgroundColor: palette.background }} />
+        <div className="h-4 w-4 rounded-full" style={{ backgroundColor: palette.accent }} />
+        <div className="h-4 w-4 rounded-full" style={{ backgroundColor: palette.muted }} />
+        <div className="h-4 w-4 rounded-full" style={{ backgroundColor: palette.foreground }} />
       </div>
-      <div>
-        <span className="text-sm font-bold" style={{ color: palette.foreground }}>{palette.name}</span>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold" style={{ color: palette.foreground }}>
+            {palette.name}
+          </span>
+          {isActive && (
+            <span
+              className="rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em]"
+              style={{ backgroundColor: palette.accentSoft, color: palette.accent }}
+            >
+              Active
+            </span>
+          )}
+        </div>
+        <p className="text-xs" style={{ color: palette.muted }}>
+          Tuned for contrast, softer depth, and accent highlights that feel alive.
+        </p>
       </div>
     </button>
   );
@@ -46,7 +75,7 @@ export default function SettingsPage() {
 
   if (loading || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ color: 'var(--muted)' }}>
+      <div className="flex min-h-screen items-center justify-center" style={{ color: "var(--muted)" }}>
         Loading...
       </div>
     );
@@ -56,89 +85,134 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-3xl mx-auto py-12 space-y-12">
-        {/* Page Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-black tracking-tighter" style={{ color: 'var(--foreground)' }}>Settings</h1>
-          <p className="text-sm font-medium" style={{ color: 'var(--muted)' }}>Customize your Socratic workspace.</p>
+      <div className="mx-auto flex max-w-5xl flex-col gap-12 px-6 py-12">
+        <div className="reveal-up relative overflow-hidden rounded-[2rem] px-8 py-10 panel-surface">
+          <div className="floating-orb absolute top-0 right-0 h-40 w-40 rounded-full blur-3xl" style={{ background: "var(--accent-soft)" }} />
+          <div className="relative space-y-3">
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.28em]"
+              style={{ backgroundColor: "var(--accent-soft)", color: "var(--accent)" }}
+            >
+              <Sparkles size={14} />
+              Workspace Tuning
+            </div>
+            <h1 className="text-4xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
+              Settings
+            </h1>
+            <p className="max-w-2xl text-sm leading-7" style={{ color: "var(--muted)" }}>
+              Refine the mood of your study space, tune the visual rhythm, and keep the interface feeling focused without becoming flat.
+            </p>
+          </div>
         </div>
 
-        {/* Appearance */}
-        <section className="space-y-6">
+        <section className="space-y-6 reveal-up stagger-1">
           <div className="flex items-center gap-3">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: 'var(--surface)', color: 'var(--accent)' }}
+              className="accent-halo flex h-10 w-10 items-center justify-center rounded-2xl panel-muted"
+              style={{ color: "var(--accent)" }}
             >
               <Palette size={18} />
             </div>
-            <h2 className="text-xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>Appearance</h2>
+            <div>
+              <h2 className="text-xl font-bold tracking-tight" style={{ color: "var(--foreground)" }}>
+                Appearance
+              </h2>
+              <p className="text-xs uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
+                Theme Library
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {themeList.map((palette) => (
-              <ThemeCard
-                key={palette.key}
-                palette={palette}
-                isActive={activeTheme === palette.key}
-                onSelect={() => setTheme(palette.key)}
-              />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {themeList.map((palette, index) => (
+              <div key={palette.key} className={index < 4 ? "stagger-2" : "stagger-3"}>
+                <ThemeCard
+                  palette={palette}
+                  isActive={activeTheme === palette.key}
+                  onSelect={() => setTheme(palette.key)}
+                />
+              </div>
             ))}
           </div>
         </section>
 
-        {/* Account */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: 'var(--surface)', color: 'var(--accent)' }}
-            >
-              <UserIcon size={18} />
+        <section className="grid gap-6 lg:grid-cols-2">
+          <div className="panel-surface reveal-up stagger-2 rounded-[2rem] p-6">
+            <div className="mb-6 flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-2xl panel-muted"
+                style={{ color: "var(--accent)" }}
+              >
+                <UserIcon size={18} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold tracking-tight" style={{ color: "var(--foreground)" }}>
+                  Account
+                </h2>
+                <p className="text-xs uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
+                  Identity
+                </p>
+              </div>
             </div>
-            <h2 className="text-xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>Account</h2>
+
+            <div className="space-y-4">
+              <div className="panel-muted rounded-2xl p-4">
+                <div className="text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
+                  Name
+                </div>
+                <div className="mt-2 text-base font-bold" style={{ color: "var(--foreground)" }}>
+                  {user.name}
+                </div>
+              </div>
+              <div className="panel-muted rounded-2xl p-4">
+                <div className="text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
+                  Email
+                </div>
+                <div className="mt-2 text-base font-bold" style={{ color: "var(--foreground)" }}>
+                  {user.email}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div
-            className="rounded-2xl p-6 space-y-4"
-            style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-widest" style={{ color: 'var(--muted)' }}>Name</span>
-              <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{user.name}</span>
+          <div className="panel-surface reveal-up stagger-3 rounded-[2rem] p-6">
+            <div className="mb-6 flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-2xl panel-muted"
+                style={{ color: "var(--accent)" }}
+              >
+                <Info size={18} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold tracking-tight" style={{ color: "var(--foreground)" }}>
+                  About
+                </h2>
+                <p className="text-xs uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
+                  System Details
+                </p>
+              </div>
             </div>
-            <div style={{ borderTop: '1px solid var(--border)' }} />
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-widest" style={{ color: 'var(--muted)' }}>Email</span>
-              <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{user.email}</span>
-            </div>
-          </div>
-        </section>
 
-        {/* About */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: 'var(--surface)', color: 'var(--accent)' }}
-            >
-              <Info size={18} />
-            </div>
-            <h2 className="text-xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>About</h2>
-          </div>
-
-          <div
-            className="rounded-2xl p-6 space-y-4"
-            style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-widest" style={{ color: 'var(--muted)' }}>Version</span>
-              <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>0.1.0</span>
-            </div>
-            <div style={{ borderTop: '1px solid var(--border)' }} />
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-widest" style={{ color: 'var(--muted)' }}>Engine</span>
-              <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Gemini 2.5 Flash</span>
+            <div className="space-y-4">
+              <div className="panel-muted rounded-2xl p-4">
+                <div className="text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
+                  Version
+                </div>
+                <div className="mt-2 text-base font-bold" style={{ color: "var(--foreground)" }}>
+                  0.1.0
+                </div>
+              </div>
+              <div className="panel-muted rounded-2xl p-4">
+                <div className="text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
+                  Engine
+                </div>
+                <div className="mt-2 text-base font-bold" style={{ color: "var(--foreground)" }}>
+                  Gemini 2.5 Flash
+                </div>
+              </div>
+              <div className="rounded-2xl px-4 py-3 text-sm" style={{ backgroundColor: "var(--accent-soft)", color: "var(--foreground)" }}>
+                Theme changes apply instantly, so the whole workspace now feels more tactile and a little less static.
+              </div>
             </div>
           </div>
         </section>
