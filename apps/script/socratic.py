@@ -1,209 +1,160 @@
-import streamlit as st
-from langchain.vectorstores import FAISS
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.schema import Document
-import google.generativeai as genai
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from groq import Groq
 import os
+import re
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
 
-gemini_api_key = os.getenv("GEMINI_API_KEY")
+groq_api_key = (
+    os.getenv("GROQ_API_KEY")
+    or os.getenv("groq_api")
+    or os.getenv("GROQ_API")
+)
+groq_model_name = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant").strip()
 
-# ---------------------------
-# 🔐 GEMINI API KEY
-# ---------------------------
-genai.configure(api_key= gemini_api_key)
+if not groq_api_key:
+    raise RuntimeError("GROQ_API_KEY is missing. Add it to apps/script/.env before starting the service.")
 
-model = genai.GenerativeModel("gemini-flash-latest")
+client = Groq(api_key=groq_api_key)
 
-# ---------------------------
-# 🧠 SESSION STATE
-# ---------------------------
-if "chats" not in st.session_state:
-    st.session_state.chats = {}
+app = FastAPI(title="Socratic AI Service")
 
-if "current_chat" not in st.session_state:
-    st.session_state.current_chat = None
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# ---------------------------
-# 📚 GENERATE NOTES
-# ---------------------------
-def generate_notes(topic):
-    prompt = f"""
-Create short structured study notes for: {topic}
-"""
-    res = model.generate_content(prompt)
-    return res.text
 
-# ---------------------------
-# 🔍 VECTOR STORE
-# ---------------------------
-def create_vectorstore(text):
-    splitter = CharacterTextSplitter(chunk_size=300, chunk_overlap=50)
-    chunks = splitter.split_text(text)
+class MessageItem(BaseModel):
+    role: str
+    content: str
 
-    docs = [Document(page_content=c) for c in chunks]
-    embeddings = HuggingFaceEmbeddings()
 
-    return FAISS.from_documents(docs, embeddings)
+class ChatRequest(BaseModel):
+    topic: str
+    history: list[MessageItem]
+    message: str
 
-# ---------------------------
-# 🧠 SMART SOCRATIC RESPONSE (1 CALL)
-# ---------------------------
-def get_socratic_response(chat, question):
-    docs = chat["vectorstore"].similarity_search(question, k=2)
-    context = "\n".join([d.page_content for d in docs])
 
-    history_text = "\n".join(
-        [f"{m['role']}: {m['content']}" for m in chat["history"][-3:]]
+class ChatResponse(BaseModel):
+    reply: str
+    isIrrelevant: bool
+
+
+def format_provider_error(exc: Exception) -> str:
+    error_text = str(exc).strip() or exc.__class__.__name__
+    lowered = error_text.lower()
+
+    if "429" in lowered or "quota" in lowered or "rate limit" in lowered:
+        retry_match = re.search(r"retry (?:after|in) ([0-9]+)s?", error_text, re.IGNORECASE)
+        retry_suffix = f" Please retry in about {retry_match.group(1)} seconds." if retry_match else ""
+        return f"Groq quota or rate limit exceeded for model '{groq_model_name}'.{retry_suffix}"
+
+    if "401" in lowered or "403" in lowered or "api key" in lowered or "permission" in lowered:
+        return f"Groq API key or permissions failed for model '{groq_model_name}'."
+
+    if "503" in lowered or "timeout" in lowered or "unavailable" in lowered or "connection" in lowered:
+        return f"Groq network or service issue for model '{groq_model_name}'."
+
+    return f"Groq request failed for model '{groq_model_name}'. {error_text}"
+
+
+def build_fallback_reply(topic: str, question: str) -> str:
+    cleaned_question = question.strip().rstrip("?.!")
+    return (
+        f"I am temporarily out of live provider quota for {topic}, so let's keep going in a lighter mode.\n\n"
+        f"For your question about \"{cleaned_question}\", what do you already know about it?\n"
+        f"Try answering these two prompts:\n"
+        f"1. What is the main idea or definition in your own words?\n"
+        f"2. Can you think of one real example from {topic} where it shows up?\n\n"
+        f"Reply with your attempt and I will guide you from there."
     )
 
-    prompt = f"""
-You are a smart AI tutor 🎓
 
-Step 1:
-Check if the question is related to topic: {chat['topic']}
+def get_socratic_response(topic: str, history: list[MessageItem], question: str) -> tuple[str, bool]:
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                f"You are a Socratic AI tutor specializing in {topic}. "
+                "Never give the final answer directly. Ask 1-2 guiding questions, "
+                "give short hints, adapt to the student's replies, keep responses short "
+                "(3-5 lines max), and if the user's question is unrelated to the topic, "
+                "respond with exactly IRRELEVANT."
+            ),
+        }
+    ]
 
-- If NOT related:
-    Reply ONLY with:
-    IRRELEVANT
+    for message in history[-6:]:
+        if message.role in {"user", "assistant"}:
+            messages.append({"role": message.role, "content": message.content})
 
-- If related:
-    Follow rules below 👇
+    messages.append({"role": "user", "content": question})
 
-Rules:
-- Ask ONLY ONE question ❗
-- Keep answer SHORT (2–3 lines)
-- Use bullet points
-- Use different emojis 🎯✨📘🤔🔥💡🧠🚀
-- Do NOT give direct answers
+    for attempt in range(3):
+        try:
+            completion = client.chat.completions.create(
+                model=groq_model_name,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=220,
+            )
+            reply = (completion.choices[0].message.content or "").strip()
+            break
+        except Exception as exc:
+            formatted_error = format_provider_error(exc)
+            if "quota or rate limit exceeded" in formatted_error.lower():
+                return build_fallback_reply(topic, question), False
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+            else:
+                raise RuntimeError(formatted_error) from exc
 
-Conversation History:
-{history_text}
+    if not reply:
+        raise RuntimeError(
+            f"Groq returned an empty response for model '{groq_model_name}'."
+        )
 
-Context:
-{context}
+    if "IRRELEVANT" in reply.upper() and len(reply) < 50:
+        return (
+            f"That question does not seem related to {topic}. "
+            f"Please ask something connected to {topic}.",
+            True,
+        )
 
-Student:
-{question}
+    return reply, False
 
-Now:
-- Give a small hint (optional)
-- Ask ONE question only
-"""
 
-    res = model.generate_content(prompt)
-    return res.text.strip()
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "service": "socratic-ai",
+        "provider": "groq",
+        "configuredModel": groq_model_name,
+    }
 
-# ---------------------------
-# 🌐 UI CONFIG
-# ---------------------------
-st.set_page_config(page_title="Socratic AI Tutor", layout="wide")
 
-st.title("🧠 Socratic AI Tutor")
+@app.post("/chat", response_model=ChatResponse)
+def chat(req: ChatRequest):
+    try:
+        reply, is_irrelevant = get_socratic_response(req.topic, req.history, req.message)
+    except RuntimeError as exc:
+        detail = str(exc)
+        status_code = 429 if "quota or rate limit exceeded" in detail.lower() else 503
+        raise HTTPException(status_code=status_code, detail=detail) from exc
 
-# ---------------------------
-# 📌 SIDEBAR
-# ---------------------------
-with st.sidebar:
-    st.markdown("## 💬 Your Chats")
+    return ChatResponse(reply=reply, isIrrelevant=is_irrelevant)
 
-    if st.button("➕ New Chat", use_container_width=True):
-        st.session_state.current_chat = None
 
-    st.markdown("---")
+if __name__ == "__main__":
+    import uvicorn
 
-    for chat_name in st.session_state.chats:
-        active = chat_name == st.session_state.current_chat
-        btn_type = "primary" if active else "secondary"
-
-        if st.button(f"📘 {chat_name}", use_container_width=True, type=btn_type):
-            st.session_state.current_chat = chat_name
-
-# ---------------------------
-# 📍 NO CHAT SELECTED
-# ---------------------------
-if st.session_state.current_chat is None:
-    st.info("👉 Start a new chat by entering a topic")
-
-    topic = st.text_input("Enter Topic (e.g., Math, Chemistry)")
-
-    if st.button("Start Learning"):
-        topic_name = topic.strip().title()
-
-        if topic_name in st.session_state.chats:
-            st.warning("⚠️ Chat already exists!")
-        else:
-            with st.spinner("⚡ Generating knowledge..."):
-                notes = generate_notes(topic)
-
-            st.session_state.chats[topic_name] = {
-                "topic": topic_name,
-                "vectorstore": create_vectorstore(notes),
-                "history": []
-            }
-
-            st.session_state.current_chat = topic_name
-            st.success(f"Started learning: {topic_name}")
-            st.rerun()
-
-    st.stop()
-
-# ---------------------------
-# 📘 CURRENT CHAT
-# ---------------------------
-chat = st.session_state.chats[st.session_state.current_chat]
-
-st.markdown(f"### 📘 {chat['topic']}")
-st.markdown("---")
-
-# ---------------------------
-# 💬 CHAT HISTORY
-# ---------------------------
-for msg in chat["history"]:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# ---------------------------
-# 📝 USER INPUT
-# ---------------------------
-user_input = st.chat_input("Ask your question...")
-
-if user_input:
-
-    # ✅ Always show user message
-    chat["history"].append({
-        "role": "user",
-        "content": user_input
-    })
-
-    # 🤖 ONE API CALL (check + response)
-    with st.spinner("🤖 Thinking..."):
-        reply = get_socratic_response(chat, user_input)
-
-    # ❗ Handle irrelevant
-    if "IRRELEVANT" in reply.upper():
-        warning = f"""
-⚠️ **Topic mismatch**
-
-You are currently learning **{chat['topic']}**
-
-• Ask related questions 📘  
-• Or create a new chat 🔄
-"""
-        chat["history"].append({
-            "role": "assistant",
-            "content": warning
-        })
-
-        st.rerun()
-
-    # ✅ Normal tutor response
-    chat["history"].append({
-        "role": "assistant",
-        "content": reply
-    })
-
-    st.rerun()
+    uvicorn.run(app, host="127.0.0.1", port=8000)

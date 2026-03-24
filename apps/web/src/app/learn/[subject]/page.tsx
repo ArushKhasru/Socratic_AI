@@ -6,12 +6,11 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useChatStore } from "@/store/useChatStore";
 import { Send, ArrowLeft, Lightbulb, RefreshCcw, HelpCircle } from "lucide-react";
 import Link from "next/link";
-import { clsx } from "clsx";
 
 export default function ChatPage() {
   const { subject } = useParams() as { subject: string };
   const { user, checkAuth, loading: authLoading } = useAuthStore();
-  const { currentSession, startSession, sendMessage, loading: chatLoading, error } = useChatStore();
+  const { currentChat, startChat, sendMessage, loading: chatLoading, error } = useChatStore();
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -25,18 +24,24 @@ export default function ChatPage() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (user && !currentSession) {
-      startSession(subject);
+    if (user && !currentChat) {
+      startChat(subject);
     }
-  }, [user, currentSession, startSession, subject]);
+  }, [user, currentChat, startChat, subject]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [currentSession?.messages]);
+  }, [currentChat?.messages]);
 
-  if (authLoading || !user) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  if (authLoading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen" style={{ color: 'var(--muted)' }}>
+        Loading...
+      </div>
+    );
+  }
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,58 +51,101 @@ export default function ChatPage() {
     await sendMessage(msg);
   };
 
+  const handleQuickAction = async (action: string) => {
+    if (chatLoading) return;
+    await sendMessage(action);
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-slate-50/50">
+    <div className="flex flex-col h-screen" style={{ backgroundColor: 'var(--background)' }}>
       {/* Header */}
       <header className="px-8 py-5 glass flex items-center justify-between shrink-0 z-10">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="p-2 -ml-2 rounded-full hover:bg-slate-100 transition-colors text-slate-500">
+          <Link
+            href="/dashboard"
+            className="p-2 -ml-2 rounded-full transition-colors"
+            style={{ color: 'var(--muted)' }}
+          >
             <ArrowLeft size={20} />
           </Link>
-          <div className="font-bold text-slate-900 tracking-tight capitalize">
-            {subject} <span className="text-blue-600 font-medium">Assistant</span>
+          <div className="font-bold tracking-tight capitalize" style={{ color: 'var(--foreground)' }}>
+            {subject} <span style={{ color: 'var(--accent)' }}>Assistant</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="px-4 py-1.5 rounded-full bg-slate-100 text-xs font-bold text-slate-500 flex items-center gap-2">
-            Attempt {currentSession?.attemptCount || 0} / 5
+          <div
+            className="px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2"
+            style={{ backgroundColor: 'var(--surface)', color: 'var(--muted)', border: '1px solid var(--border)' }}
+          >
+            {currentChat?.messages.filter(m => m.role === 'user').length || 0} questions asked
           </div>
-          <button className="p-2 rounded-full bg-slate-100 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
-             <RefreshCcw size={18} />
+          <button
+            className="p-2 rounded-full transition-all"
+            style={{ backgroundColor: 'var(--surface)', color: 'var(--muted)', border: '1px solid var(--border)' }}
+            onClick={() => {
+              // Reset chat for a new session
+              useChatStore.setState({ currentChat: null });
+              startChat(subject);
+            }}
+          >
+            <RefreshCcw size={18} />
           </button>
         </div>
       </header>
 
       {/* Chat Area */}
-      <div 
+      <div
         ref={scrollRef}
         className="flex-grow overflow-y-auto px-4 py-8 space-y-8 flex flex-col items-center"
       >
-        <div className="w-full max-w-3xl space-y-8">
-          {currentSession?.messages.map((m, i) => (
-            <div 
-              key={i} 
-              className={clsx(
-                "flex w-full",
-                m.role === 'user' ? "justify-end" : "justify-start"
-              )}
+        <div className="w-full max-w-3xl space-y-6">
+          {/* Welcome message if no messages yet */}
+          {(!currentChat || currentChat.messages.length === 0) && !chatLoading && (
+            <div className="text-center py-16 space-y-4">
+              <div className="text-5xl">🧠</div>
+              <h2 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+                Ready to explore <span className="capitalize">{subject}</span>?
+              </h2>
+              <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--muted)' }}>
+                Ask a question and I'll guide you to the answer through the Socratic method — no spoilers, just discovery!
+              </p>
+            </div>
+          )}
+
+          {currentChat?.messages.map((m, i) => (
+            <div
+              key={i}
+              className={`flex w-full ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={clsx(
-                "max-w-[85%] p-6 rounded-[2rem] text-[15px] leading-relaxed",
-                m.role === 'user' 
-                  ? "bg-slate-900 text-white rounded-tr-lg shadow-xl" 
-                  : "bg-white text-slate-800 rounded-tl-lg shadow-tonal border border-slate-100"
-              )}>
+              <div
+                className="max-w-[85%] p-5 rounded-2xl text-[15px] leading-relaxed whitespace-pre-wrap"
+                style={m.role === 'user'
+                  ? {
+                      backgroundColor: 'var(--accent)',
+                      color: 'var(--background)',
+                      borderTopRightRadius: '8px',
+                    }
+                  : {
+                      backgroundColor: 'var(--surface)',
+                      color: 'var(--foreground)',
+                      borderTopLeftRadius: '8px',
+                      border: '1px solid var(--border)',
+                    }
+                }
+              >
                 {m.content}
               </div>
             </div>
           ))}
           {chatLoading && (
             <div className="flex justify-start">
-              <div className="p-6 rounded-[2rem] rounded-tl-lg bg-white border border-slate-50 shadow-sm flex gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-200 animate-bounce"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-200 animate-bounce [animation-delay:0.2s]"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-200 animate-bounce [animation-delay:0.4s]"></span>
+              <div
+                className="p-5 rounded-2xl flex gap-1.5"
+                style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}
+              >
+                <span className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--muted)' }} />
+                <span className="w-2 h-2 rounded-full animate-bounce [animation-delay:0.2s]" style={{ backgroundColor: 'var(--muted)' }} />
+                <span className="w-2 h-2 rounded-full animate-bounce [animation-delay:0.4s]" style={{ backgroundColor: 'var(--muted)' }} />
               </div>
             </div>
           )}
@@ -105,30 +153,60 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="p-8 shrink-0 bg-transparent">
-        <div className="max-w-3xl mx-auto space-y-4">
+      <div className="p-6 shrink-0">
+        <div className="max-w-3xl mx-auto space-y-3">
+          {error && (
+            <div
+              className="rounded-2xl px-4 py-3 text-sm"
+              style={{
+                backgroundColor: '#fff1f2',
+                color: '#9f1239',
+                border: '1px solid #fecdd3',
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           {/* Quick Actions */}
           <div className="flex gap-2">
-            <button className="px-4 py-2 rounded-2xl bg-amber-50 text-amber-600 text-xs font-bold flex items-center gap-2 hover:bg-amber-100 transition-colors border border-amber-100">
-               <Lightbulb size={14} /> Simplified Hint
+            <button
+              className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors"
+              style={{ backgroundColor: 'var(--surface)', color: 'var(--accent)', border: '1px solid var(--border)' }}
+              onClick={() => handleQuickAction("Can you give me a hint?")}
+            >
+              <Lightbulb size={14} /> Get a Hint
             </button>
-            <button className="px-4 py-2 rounded-2xl bg-blue-50 text-blue-600 text-xs font-bold flex items-center gap-2 hover:bg-blue-100 transition-colors border border-blue-100">
-               <HelpCircle size={14} /> Explain Concept
+            <button
+              className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors"
+              style={{ backgroundColor: 'var(--surface)', color: 'var(--accent)', border: '1px solid var(--border)' }}
+              onClick={() => handleQuickAction("Can you explain this concept more simply?")}
+            >
+              <HelpCircle size={14} /> Simplify
             </button>
           </div>
 
           <form onSubmit={handleSend} className="relative group">
-            <input 
-              type="text" 
-              className="w-full p-6 pr-20 rounded-[2rem] bg-white border border-slate-200 shadow-xl focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all text-slate-800"
-              placeholder="Type your thought or answer here..."
+            <input
+              type="text"
+              className="w-full p-5 pr-20 rounded-2xl shadow-tonal focus:outline-none transition-all"
+              style={{
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)',
+              }}
+              placeholder="Ask your question..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={chatLoading}
             />
-            <button 
-              type="submit" 
-              className="absolute right-3 top-3 bottom-3 px-6 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 transition-all flex items-center justify-center disabled:opacity-50"
+            <button
+              type="submit"
+              className="absolute right-3 top-3 bottom-3 px-6 rounded-xl transition-all flex items-center justify-center disabled:opacity-50"
+              style={{
+                backgroundColor: 'var(--accent)',
+                color: 'var(--background)',
+              }}
               disabled={!input.trim() || chatLoading}
             >
               <Send size={20} />

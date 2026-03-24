@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { SessionModel } from '../models/Session';
-import { getTopicSummary } from '../services/gemini';
 
 export const createSession = async (req: Request, res: Response) => {
   const { subject } = req.body;
@@ -64,12 +63,11 @@ export const endSession = async (req: Request, res: Response) => {
 
     const endedAt = new Date();
     const duration = Math.round((endedAt.getTime() - session.startedAt.getTime()) / 1000);
-    const topic = await getTopicSummary(session.messages);
 
     session.isActive = false;
     session.endedAt = endedAt;
     session.duration = duration;
-    session.topic = topic;
+    session.topic = session.subject;
 
     await session.save();
     res.json({ success: true, data: session });
