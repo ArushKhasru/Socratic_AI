@@ -298,11 +298,153 @@ The project expects environment configuration for:
 - Python tutor service URL
 - Groq API key for the tutor service
 
-Typical values used by the code:
+Each service has an `.env.example` file listing the required variables:
 
-- Web API base URL: `NEXT_PUBLIC_API_URL`
-- Backend tutor service URL: `PYTHON_SERVICE_URL`
-- Python service key: `groq_api`
+| Service | File | Variables |
+|---------|------|-----------|
+| Backend | `apps/backend/.env.example` | `MONGODB_URI`, `JWT_SECRET`, `FRONTEND_URL`, `PYTHON_SERVICE_URL` |
+| Python service | `apps/script/.env.example` | `GROQ_API_KEY` |
+| Web app | `apps/web/.env.example` | `NEXT_PUBLIC_API_URL` |
+
+Copy the example file to `.env` in the same directory and fill in the values before running locally:
+
+```bash
+cp apps/backend/.env.example apps/backend/.env
+cp apps/script/.env.example apps/script/.env
+cp apps/web/.env.example apps/web/.env
+```
+
+## Deploy for Free
+
+All three services can be deployed for free using **Vercel** and **MongoDB Atlas**.
+
+### Free services used
+
+| Service | Platform | Free tier |
+|---------|----------|-----------|
+| Web (Next.js) | [Vercel](https://vercel.com) | Hobby plan — unlimited Next.js deployments |
+| Backend (Express) | [Vercel](https://vercel.com) | Hobby plan — serverless Node.js functions |
+| Python tutor | [Vercel](https://vercel.com) | Hobby plan — serverless Python functions |
+| Database (MongoDB) | [MongoDB Atlas](https://cloud.mongodb.com) | M0 cluster — 512 MB free storage |
+| AI (Groq LLM) | [Groq](https://console.groq.com) | Free tier with generous rate limits |
+
+---
+
+### Step 1 — Set up MongoDB Atlas (free database)
+
+1. Go to [https://cloud.mongodb.com](https://cloud.mongodb.com) and create a free account.
+2. Create a new **free M0 cluster** (choose any cloud region).
+3. Under **Database Access**, create a database user with a username and password.
+4. Under **Network Access**, add `0.0.0.0/0` to allow connections from anywhere (required for Vercel).
+5. Click **Connect → Drivers** and copy the connection string. It looks like:
+   ```
+   mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/socratic-ai?retryWrites=true&w=majority
+   ```
+   Replace `<username>` and `<password>` with the credentials you just created.
+
+---
+
+### Step 2 — Get a free Groq API key
+
+1. Go to [https://console.groq.com](https://console.groq.com) and sign in.
+2. Navigate to **API Keys** and create a new key.
+3. Copy the key — you will use it as `GROQ_API_KEY` when deploying the Python service.
+
+---
+
+### Step 3 — Deploy the Python tutor service to Vercel
+
+The `apps/script` directory already contains a `vercel.json` that configures the Python serverless function.
+
+1. Install the Vercel CLI (or use the Vercel dashboard):
+   ```bash
+   npm install -g vercel
+   ```
+2. From the `apps/script` directory, run:
+   ```bash
+   cd apps/script
+   vercel
+   ```
+3. Follow the prompts. When asked for environment variables, set:
+   - `GROQ_API_KEY` — your Groq API key from Step 2
+4. After deployment, copy the production URL (e.g. `https://your-python-service.vercel.app`). You will need it in Step 4.
+
+> **Vercel Dashboard alternative**: Go to [vercel.com/new](https://vercel.com/new), import this repository, set the **Root Directory** to `apps/script`, and add the environment variable above.
+
+---
+
+### Step 4 — Deploy the backend to Vercel
+
+The `apps/backend` directory already contains a `vercel.json` that configures the Express serverless function.
+
+1. From the `apps/backend` directory, run:
+   ```bash
+   cd apps/backend
+   vercel
+   ```
+2. When asked for environment variables, set:
+   - `MONGODB_URI` — the Atlas connection string from Step 1
+   - `JWT_SECRET` — any long random string (e.g. `openssl rand -hex 32`)
+   - `PYTHON_SERVICE_URL` — the URL from Step 3
+   - `FRONTEND_URL` — leave blank for now; you will update it after Step 5
+3. After deployment, copy the production URL (e.g. `https://your-backend.vercel.app`).
+
+> **Vercel Dashboard alternative**: Import this repository, set **Root Directory** to `apps/backend`, and add the environment variables above.
+
+---
+
+### Step 5 — Deploy the web app to Vercel
+
+Vercel automatically detects Next.js projects — no extra `vercel.json` is needed.
+
+1. From the `apps/web` directory, run:
+   ```bash
+   cd apps/web
+   vercel
+   ```
+2. When asked for environment variables, set:
+   - `NEXT_PUBLIC_API_URL` — the backend URL from Step 4
+3. After deployment, copy the production URL (e.g. `https://your-web-app.vercel.app`).
+
+> **Vercel Dashboard alternative**: Import this repository, set **Root Directory** to `apps/web`, and add the environment variable above.
+
+---
+
+### Step 6 — Update CORS in the backend
+
+Go back to your backend Vercel project settings and update the `FRONTEND_URL` environment variable to the web app URL from Step 5, then redeploy:
+
+```bash
+cd apps/backend
+vercel env add FRONTEND_URL
+# enter: https://your-web-app.vercel.app
+vercel --prod
+```
+
+---
+
+### Summary of environment variables
+
+**`apps/backend` (Vercel project)**
+
+| Variable | Value |
+|----------|-------|
+| `MONGODB_URI` | MongoDB Atlas connection string |
+| `JWT_SECRET` | Any long random secret string |
+| `PYTHON_SERVICE_URL` | URL of the deployed Python service |
+| `FRONTEND_URL` | URL of the deployed web app |
+
+**`apps/script` (Vercel project)**
+
+| Variable | Value |
+|----------|-------|
+| `GROQ_API_KEY` | Groq API key |
+
+**`apps/web` (Vercel project)**
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_API_URL` | URL of the deployed backend |
 
 ## Why This Project Matters
 
