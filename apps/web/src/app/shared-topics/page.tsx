@@ -77,7 +77,7 @@ export default function SharedTopicsPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b px-8 py-4" style={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}>
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b px-4 py-3 sm:px-6 sm:py-4 lg:px-8" style={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}>
         <div className="flex items-center gap-4">
           <Link
             href="/dashboard"
@@ -102,18 +102,18 @@ export default function SharedTopicsPage() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-8 py-12">
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:gap-10 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         <div className="flex justify-center">
-          <div className="flex gap-2 p-1 rounded-2xl bg-[var(--surface-alt)] border border-[var(--border)]">
+          <div className="flex w-full max-w-md gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface-alt)] p-1">
             <button
               onClick={() => setActiveTab('with-me')}
-              className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === 'with-me' ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--foreground)]'}`}
+              className={`flex-1 rounded-xl px-4 py-3 text-xs font-bold transition-all sm:px-6 sm:text-sm ${activeTab === 'with-me' ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--foreground)]'}`}
             >
               Shared with Me ({sharedWithMe.length})
             </button>
             <button
               onClick={() => setActiveTab('by-me')}
-              className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === 'by-me' ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--foreground)]'}`}
+              className={`flex-1 rounded-xl px-4 py-3 text-xs font-bold transition-all sm:px-6 sm:text-sm ${activeTab === 'by-me' ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--muted)] hover:text-[var(--foreground)]'}`}
             >
               Shared by Me ({sharedByMe.length})
             </button>

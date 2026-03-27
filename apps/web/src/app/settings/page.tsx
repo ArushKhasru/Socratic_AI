@@ -127,7 +127,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-12">
+      <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8 sm:gap-10 sm:px-6 sm:py-12">
 
         <section className="space-y-6 reveal-up stagger-1">
           <div className="flex items-center gap-3">
@@ -159,7 +159,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-2">
+        <section className="grid gap-5 sm:gap-6 lg:grid-cols-2">
           <div className="panel-surface reveal-up stagger-2 rounded-[2rem] p-6">
             <div className="mb-6 flex items-center gap-3">
               <div

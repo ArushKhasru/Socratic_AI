@@ -31,6 +31,12 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-lato);
   color: var(--foreground);
@@ -242,23 +248,55 @@ body {
 
 .ghost-shell {
   position: relative;
-  transform: translate(-50%, -50%) rotate(var(--ghost-tilt, 0deg)) scale(var(--ghost-scale, 1));
-  transition: transform 120ms ease;
+  transform: translate(-50%, -50%) rotate(var(--ghost-tilt, 0deg)) scale(var(--ghost-scale, 1)) scaleY(var(--ghost-squash, 1));
+  transition: transform 80ms ease-out;
+  animation: ghost-hover 3s ease-in-out infinite;
 }
 
 .ghost-aura {
   position: absolute;
-  inset: 8px;
+  inset: -4px;
   border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 50%, white) 0%, transparent 70%);
-  filter: blur(10px);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 60%, white) 0%, color-mix(in srgb, var(--accent) 30%, transparent) 40%, transparent 70%);
+  filter: blur(12px);
   animation: ghost-glow-pulse 1.9s ease-in-out infinite;
+}
+
+/* Wispy trail effect */
+.ghost-shell::before {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 24px;
+  background: linear-gradient(180deg, color-mix(in srgb, white 60%, var(--accent)) 0%, transparent 100%);
+  filter: blur(8px);
+  opacity: 0.4;
+  animation: ghost-wisp 2.4s ease-in-out infinite;
+}
+
+/* Secondary floating particles */
+.ghost-shell::after {
+  content: "";
+  position: absolute;
+  inset: -20px;
+  background:
+    radial-gradient(2px 2px at 20% 30%, color-mix(in srgb, white 80%, var(--accent)) 50%, transparent 100%),
+    radial-gradient(2px 2px at 80% 40%, color-mix(in srgb, white 70%, var(--accent)) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 70%, color-mix(in srgb, white 60%, var(--accent)) 50%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 70% 80%, color-mix(in srgb, white 50%, var(--accent)) 50%, transparent 100%);
+  animation: ghost-sparkle 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .ghost-svg {
   width: 52px;
   height: 52px;
-  filter: drop-shadow(0 8px 14px color-mix(in srgb, var(--accent) 20%, black));
+  filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--accent) 35%, black))
+          drop-shadow(0 2px 4px color-mix(in srgb, var(--accent) 20%, white));
+  animation: ghost-breathe 2.8s ease-in-out infinite;
 }
 
 .ghost-eye {
@@ -271,11 +309,13 @@ body {
   stroke: #5f3f85;
   stroke-width: 2.6;
   stroke-linecap: round;
+  animation: ghost-smile 4s ease-in-out infinite;
 }
 
 .ghost-blush {
   fill: color-mix(in srgb, var(--accent) 35%, #ff9bcf);
   opacity: 0.75;
+  animation: ghost-blush-pulse 3s ease-in-out infinite;
 }
 
 .stagger-1 {
@@ -378,7 +418,85 @@ body {
   }
   50% {
     opacity: 0.92;
-    transform: scale(1.05);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes ghost-hover {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(var(--ghost-tilt, 0deg)) scale(var(--ghost-scale, 1)) translateY(0);
+  }
+  25% {
+    transform: translate(-50%, -50%) rotate(var(--ghost-tilt, 0deg)) scale(var(--ghost-scale, 1)) translateY(-3px) translateX(1px);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(var(--ghost-tilt, 0deg)) scale(var(--ghost-scale, 1)) translateY(-5px);
+  }
+  75% {
+    transform: translate(-50%, -50%) rotate(var(--ghost-tilt, 0deg)) scale(var(--ghost-scale, 1)) translateY(-2px) translateX(-1px);
+  }
+}
+
+@keyframes ghost-breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes ghost-wisp {
+  0%, 100% {
+    opacity: 0.4;
+    transform: translateX(-50%) scaleY(1) scaleX(1);
+  }
+  33% {
+    opacity: 0.6;
+    transform: translateX(-50%) scaleY(1.3) scaleX(0.85);
+  }
+  66% {
+    opacity: 0.35;
+    transform: translateX(-50%) scaleY(0.9) scaleX(1.1);
+  }
+}
+
+@keyframes ghost-sparkle {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    opacity: 0.8;
+    transform: translateY(-2px) rotate(3deg);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-4px) rotate(-2deg);
+  }
+  75% {
+    opacity: 0.9;
+    transform: translateY(-1px) rotate(1deg);
+  }
+}
+
+@keyframes ghost-smile {
+  0%, 40%, 100% {
+    d: path("M24 36.2c2.4 3.2 13.6 3.2 16 0");
+  }
+  50%, 60% {
+    d: path("M24 35c2.4 4 13.6 4 16 0");
+  }
+}
+
+@keyframes ghost-blush-pulse {
+  0%, 100% {
+    opacity: 0.75;
+    r: 2.2px;
+  }
+  50% {
+    opacity: 0.9;
+    r: 2.5px;
   }
 }
 
@@ -399,6 +517,149 @@ body {
     transform: translateY(0) scaleY(1);
   }
 }
+
+@keyframes animate-progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* Mobile Touch Interactions */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  [role="button"],
+  a {
+    position: relative;
+  }
+
+  /* Active state animation for touch devices */
+  button:active,
+  [role="button"]:active,
+  a:active {
+    transform: scale(0.95);
+  }
+
+  /* Longer transitions on mobile for visibility */
+  * {
+    transition-duration: 200ms !important;
+  }
+}
+
+/* Tap ripple effect for buttons */
+@keyframes tap-ripple {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+
+.mobile-tap-feedback {
+  transition: transform 140ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mobile-tap-feedback:active {
+  transform: scale(0.92);
+}
+
+.bounce-enter {
+  animation: bounce-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.slide-up-enter {
+  animation: slide-up 380ms ease-out;
+}
+
+.slide-down-enter {
+  animation: slide-down 380ms ease-out;
+}
+
+.stagger-list > * {
+  animation: slide-up 420ms ease-out backwards;
+}
+
+.stagger-list > :nth-child(1) { animation-delay: 60ms; }
+.stagger-list > :nth-child(2) { animation-delay: 120ms; }
+.stagger-list > :nth-child(3) { animation-delay: 180ms; }
+.stagger-list > :nth-child(4) { animation-delay: 240ms; }
+.stagger-list > :nth-child(5) { animation-delay: 300ms; }
+.stagger-list > :nth-child(n+6) { animation-delay: 360ms; }
 
 @media (prefers-reduced-motion: reduce) {
   *,

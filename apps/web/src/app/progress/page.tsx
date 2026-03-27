@@ -88,7 +88,7 @@ export default function ProgressPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)]">
-      <header className="px-8 py-6 flex items-center justify-between sticky top-0 z-40 glass border-b border-[var(--border)]">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[var(--border)] px-4 py-3 glass sm:px-6 sm:py-5 lg:px-8 lg:py-6">
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="p-2 hover:bg-[var(--surface)] rounded-xl transition-colors" style={{ color: 'var(--muted)' }}>
             <ArrowLeft size={20} />
@@ -97,8 +97,8 @@ export default function ProgressPage() {
             Your <span style={{ color: 'var(--accent)' }}>Insights</span>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--surface)] rounded-full border border-[var(--border)]">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="hidden items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 sm:flex">
             <Flame size={16} className="text-[#FF8A65]" />
             <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{statsData.streak} Day Streak</span>
           </div>
@@ -108,7 +108,7 @@ export default function ProgressPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto w-full px-8 py-12 space-y-12">
+      <main className="mx-auto w-full max-w-6xl space-y-10 px-4 py-8 sm:space-y-12 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         <section className="space-y-4">
           <h1 className="text-4xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
             Intellectual Journey
@@ -290,7 +290,7 @@ export default function ProgressPage() {
         </section>
       </main>
 
-      <nav className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-4 glass border border-[var(--border)] rounded-full flex items-center gap-8 shadow-2xl z-50">
+      <nav className="safe-bottom fixed bottom-3 left-1/2 z-50 flex -translate-x-1/2 items-center gap-8 rounded-full border border-[var(--border)] px-6 py-4 glass shadow-2xl md:hidden">
         <Link href="/dashboard" style={{ color: 'var(--muted)' }}><LayoutDashboard size={20} /></Link>
         <Link href="/learn" style={{ color: 'var(--accent)' }}><BookOpen size={20} /></Link>
         <Link href="/progress" style={{ color: 'var(--accent)' }}><Activity size={20} /></Link>

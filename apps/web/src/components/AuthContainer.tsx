@@ -85,7 +85,7 @@ export default function AuthContainer() {
       style={{ fontFamily: "Inter, Segoe UI, Arial, sans-serif", backgroundColor: "var(--background)", color: "var(--foreground)" }}
     >
       <section
-        className="relative hidden min-h-screen w-1/2 items-center justify-center overflow-hidden px-12 py-16 md:flex"
+        className="relative hidden min-h-screen w-1/2 items-center justify-center overflow-hidden px-12 py-16 lg:flex"
         style={{ backgroundColor: "color-mix(in srgb, var(--background) 84%, black 16%)" }}
       >
         <div
@@ -129,7 +129,7 @@ export default function AuthContainer() {
         </div>
       </section>
 
-      <section className="relative flex min-h-screen w-full items-center justify-center px-6 py-10 md:w-1/2 md:px-16 lg:px-20">
+      <section className="relative flex min-h-screen w-full items-center justify-center px-4 py-8 sm:px-6 sm:py-10 lg:w-1/2 lg:px-16 xl:px-20">
         <div className="absolute left-8 top-8 flex items-center gap-3 md:hidden">
           <BrandMark className="h-9 w-9" />
           <span className="text-xl font-bold tracking-tight" style={{ color: "var(--foreground)", fontFamily: "'Plus Jakarta Sans', Inter, Segoe UI, sans-serif" }}>
@@ -138,7 +138,7 @@ export default function AuthContainer() {
         </div>
 
         <div
-          className="w-full max-w-md rounded-[2rem] p-6 sm:p-8"
+          className="w-full max-w-md rounded-[2rem] p-5 sm:p-6 md:p-8"
           style={panelStyle}
         >
           <AnimatePresence mode="wait" initial={false}>
@@ -158,7 +158,7 @@ export default function AuthContainer() {
             />
 
             <div className="space-y-2 text-center">
-              <h2 className="text-3xl font-extrabold tracking-[-0.04em]" style={{ fontFamily: "'Plus Jakarta Sans', Inter, Segoe UI, sans-serif" }}>
+              <h2 className="text-2xl font-extrabold tracking-[-0.04em] sm:text-3xl" style={{ fontFamily: "'Plus Jakarta Sans', Inter, Segoe UI, sans-serif" }}>
                 {mode === "signin" ? "Welcome back" : "Join Socratic AI"}
               </h2>
               <p className="text-sm" style={{ color: "var(--muted)" }}>

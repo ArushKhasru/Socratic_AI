@@ -122,30 +122,30 @@ export default function DashboardPage() {
         style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)" }}
       />
 
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b px-8 py-4" style={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}>
-        <div className="flex items-center gap-4">
-          <div>
-            <div className="text-xl font-black uppercase tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
-              Socratic AI
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b px-3 py-2.5 sm:px-6 sm:py-4 lg:px-8 slide-down-enter" style={{ backgroundColor: "var(--background)", borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+          <div className="min-w-0">
+            <div className="text-base sm:text-xl font-black uppercase tracking-[-0.04em] truncate" style={{ color: "var(--foreground)" }}>
+              Socratic <span style={{ color: "var(--accent)" }}>AI</span>
             </div>
-            <div className="text-[9px] font-black uppercase tracking-[0.22em]" style={{ color: "var(--muted)" }}>
-              Student Dashboard
+            <div className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.22em]" style={{ color: "var(--muted)" }}>
+              Dashboard
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link
             href="/shared-topics"
-            className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-bold md:inline-flex"
+            className="hidden sm:inline-flex items-center gap-2 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold mobile-tap-feedback"
             style={{ backgroundColor: "var(--surface-alt)", color: "var(--foreground)" }}
           >
             <Share2 size={16} />
-            Shared
+            <span className="hidden md:inline">Shared</span>
           </Link>
           <Link
             href="/profile"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-black shadow-tonal"
+            className="flex h-10 sm:h-11 w-10 sm:w-11 items-center justify-center rounded-full text-sm font-black shadow-tonal mobile-tap-feedback active:scale-90"
             style={{ background: recommendedVisual.gradient, color: "var(--foreground)" }}
           >
             {user.name.charAt(0).toUpperCase()}
@@ -153,54 +153,54 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="px-8 py-12">
-        <section className="mb-14 max-w-6xl space-y-5">
+      <main className="px-2.5 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <section className="mb-8 sm:mb-10 lg:mb-14 max-w-6xl space-y-3 sm:space-y-4">
         <div
-          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.28em]"
+          className="inline-flex items-center gap-2 rounded-full px-2.5 sm:px-4 py-2 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.24em] sm:tracking-[0.28em] bounce-enter"
           style={{ backgroundColor: "var(--accent-soft)", color: "var(--accent)" }}
         >
-          <Sparkles size={14} />
-          Question-first workspace
+          <Sparkles size={12} className="sm:w-3.5 sm:h-3.5" />
+          <span>Question-first workspace</span>
         </div>
-        <h1 className="text-5xl font-black tracking-[-0.06em] sm:text-6xl xl:text-7xl" style={{ color: "var(--foreground)" }}>
+        <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-[-0.04em] leading-tight sm:leading-normal" style={{ color: "var(--foreground)" }}>
           Hello, <span style={{ color: "var(--accent)" }}>{user.name}</span>.
-          <br />
-          Ready to explore today?
+          <br className="hidden sm:block" />
+          <span className="text-lg sm:text-4xl md:text-5xl">Ready to explore today?</span>
         </h1>
-        <p className="max-w-2xl text-lg leading-8" style={{ color: "var(--muted)" }}>
-          Your learning space is tuned to discovery, reflection, and momentum. Pick up where you left off or jump into a fresh subject.
+        <p className="max-w-2xl text-sm sm:text-base lg:text-lg leading-6 sm:leading-7 lg:leading-8" style={{ color: "var(--muted)" }}>
+          Your learning space is tuned to discovery, reflection, and momentum.
         </p>
       </section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <section className="panel-surface lg:col-span-4 rounded-[2rem] p-8">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.24em]" style={{ color: "var(--accent)" }}>
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
+        <section className="panel-surface lg:col-span-4 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 lg:p-8 bounce-enter">
+          <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-[8px] sm:text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.24em]" style={{ color: "var(--accent)" }}>
                 Daily Goal
               </div>
-              <div className="mt-2 text-4xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
+              <div className="mt-1.5 sm:mt-2 text-3xl sm:text-4xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
                 {Math.round(dashboardStats.progressMinutes)}
-                <span className="ml-1 text-lg font-bold" style={{ color: "var(--muted)" }}>
+                <span className="ml-1 text-sm sm:text-lg font-bold" style={{ color: "var(--muted)" }}>
                   /{dashboardStats.goalMinutes}m
                 </span>
               </div>
             </div>
             <div
-              className="flex h-14 w-14 items-center justify-center rounded-2xl"
+              className="flex h-12 sm:h-14 w-12 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl shrink-0"
               style={{ backgroundColor: "var(--accent-soft)", color: "var(--accent)" }}
             >
-              <Flame size={24} />
+              <Flame size={20} className="sm:w-6 sm:h-6" />
             </div>
           </div>
 
-          <div className="mb-4 flex items-center justify-between text-sm">
+          <div className="mb-3 sm:mb-4 flex items-center justify-between text-xs sm:text-sm gap-2">
             <span style={{ color: "var(--foreground)" }}>{dashboardStats.progressPercent}% reached</span>
             <span style={{ color: "var(--muted)" }}>{Math.max(0, dashboardStats.goalMinutes - dashboardStats.progressMinutes).toFixed(0)}m left</span>
           </div>
-          <div className="h-2.5 overflow-hidden rounded-full" style={{ backgroundColor: "color-mix(in srgb, var(--surface-alt) 84%, black 16%)" }}>
+          <div className="h-2 sm:h-2.5 overflow-hidden rounded-full" style={{ backgroundColor: "color-mix(in srgb, var(--surface-alt) 84%, black 16%)" }}>
             <div
-              className="h-full rounded-full"
+              className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${dashboardStats.progressPercent}%`,
                 background: "linear-gradient(90deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 45%, white) 100%)",
@@ -209,51 +209,52 @@ export default function DashboardPage() {
             />
           </div>
 
-          <p className="mt-8 text-sm italic leading-7" style={{ color: "var(--muted)" }}>
-            Just a little more time today keeps your rhythm alive and your concepts fresh.
+          <p className="mt-6 sm:mt-8 text-xs sm:text-sm italic leading-6 sm:leading-7" style={{ color: "var(--muted)" }}>
+            Keep your momentum alive.
           </p>
         </section>
 
-        {topSubjects.map((subject) => {
+        {topSubjects.map((subject, idx) => {
           const visual = getSubjectVisual(subject.slug);
           const mastery = Math.max(54, 92 - sessions.filter((session) => session.subject === subject.slug).length * 6);
           return (
             <Link
               key={subject.slug}
               href={`/learn/${subject.slug}`}
-              className="group panel-surface interactive-card lg:col-span-4 overflow-hidden rounded-[2rem]"
+              className="group panel-surface interactive-card lg:col-span-4 overflow-hidden rounded-2xl sm:rounded-[2rem] bounce-enter"
+              style={{ animationDelay: `${idx * 60}ms` }}
             >
               <div
-                className="relative h-52 overflow-hidden px-8 py-8"
+                className="relative h-40 sm:h-52 overflow-hidden px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8"
                 style={{ background: visual.gradient }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--surface)]/90 to-transparent" />
                 <div
-                  className="absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl"
+                  className="absolute -right-8 sm:-right-10 -top-8 sm:-top-10 h-24 sm:h-32 w-24 sm:w-32 rounded-full blur-2xl sm:blur-3xl"
                   style={{ backgroundColor: visual.soft }}
                 />
                 <div className="relative flex h-full flex-col justify-end">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border" style={{ color: visual.accent, borderColor: "color-mix(in srgb, white 12%, transparent)", backgroundColor: "rgba(11,19,38,0.28)" }}>
+                  <div className="mb-3 flex h-10 sm:h-14 w-10 sm:w-14 items-center justify-center rounded-lg sm:rounded-2xl border" style={{ color: visual.accent, borderColor: "color-mix(in srgb, white 12%, transparent)", backgroundColor: "rgba(11,19,38,0.28)" }}>
                     {visual.icon}
                   </div>
-                  <h3 className="text-3xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
+                  <h3 className="text-xl sm:text-3xl font-black tracking-[-0.04em] line-clamp-2" style={{ color: "var(--foreground)" }}>
                     {subject.name}
                   </h3>
-                  <p className="mt-2 text-sm font-semibold" style={{ color: visual.accent }}>
+                  <p className="mt-1 sm:mt-2 text-xs sm:text-sm font-semibold line-clamp-1" style={{ color: visual.accent }}>
                     {subject.description}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between px-8 py-7">
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-7">
+                <div className="min-w-0">
+                  <div className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.24em]" style={{ color: "var(--muted)" }}>
                     Mastery
                   </div>
-                  <div className="mt-2 text-3xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
+                  <div className="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
                     {stats?.masteryData?.find((item) => item.subject.toLowerCase() === subject.slug.toLowerCase())?.level || 64}%
                   </div>
                 </div>
-                <div className="relative h-16 w-16">
+                <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0">
                   <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
                     <circle cx="18" cy="18" r="16" fill="none" stroke="var(--border)" strokeWidth="3" />
                     <circle
@@ -265,6 +266,7 @@ export default function DashboardPage() {
                       strokeDasharray={`${mastery}, 100`}
                       strokeLinecap="round"
                       strokeWidth="3"
+                      className="transition-all duration-1000"
                     />
                   </svg>
                 </div>
@@ -273,29 +275,29 @@ export default function DashboardPage() {
           );
         })}
 
-        <section className="panel-surface lg:col-span-8 rounded-[2rem] p-8 lg:p-10">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
+        <section className="panel-surface lg:col-span-8 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 lg:p-8 lg:p-10 bounce-enter" style={{ animationDelay: '180ms' }}>
+          <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl sm:text-2xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
                 Recent Deep Dives
               </h2>
-              <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
-                Resume your latest sessions and keep the thread of understanding intact.
+              <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm line-clamp-2" style={{ color: "var(--muted)" }}>
+                Resume your latest sessions.
               </p>
             </div>
-            <Link href="/shared-topics" className="text-sm font-bold transition-colors hover:text-[var(--foreground)]" style={{ color: "var(--accent)" }}>
-              View shared work
+            <Link href="/shared-topics" className="text-xs sm:text-sm font-bold transition-colors hover:text-[var(--foreground)] whitespace-nowrap mobile-tap-feedback" style={{ color: "var(--accent)" }}>
+              View shared
             </Link>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-3 sm:space-y-4 lg:space-y-5 stagger-list">
             {recentSessions.length === 0 ? (
-              <div className="rounded-[1.5rem] px-6 py-16 text-center panel-muted">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--accent-soft)", color: "var(--accent)" }}>
-                  <History size={22} />
+              <div className="rounded-xl sm:rounded-[1.5rem] px-4 sm:px-6 py-10 sm:py-16 text-center panel-muted">
+                <div className="mx-auto mb-3 sm:mb-4 flex h-12 sm:h-14 w-12 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl" style={{ backgroundColor: "var(--accent-soft)", color: "var(--accent)" }}>
+                  <History size={20} className="sm:w-5 sm:h-5" />
                 </div>
-                <p style={{ color: "var(--muted)" }}>
-                  No sessions yet. Start a subject above and your recent deep dives will appear here.
+                <p className="text-xs sm:text-sm" style={{ color: "var(--muted)" }}>
+                  No sessions yet. Start a subject above.
                 </p>
               </div>
             ) : (
@@ -305,27 +307,29 @@ export default function DashboardPage() {
                   <Link
                     key={session._id}
                     href={`/learn/${session.subject}?chatId=${session._id}`}
-                    className="interactive-card flex flex-col gap-5 rounded-[1.5rem] px-6 py-6 md:flex-row md:items-center"
+                    className="interactive-card flex flex-col gap-3 sm:gap-4 lg:gap-5 rounded-xl sm:rounded-[1.5rem] px-4 sm:px-6 py-4 sm:py-6 mobile-tap-feedback"
                     style={{ backgroundColor: "color-mix(in srgb, var(--surface-alt) 42%, var(--surface))" }}
                   >
-                    <div
-                      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full"
-                      style={{ backgroundColor: visual.soft, color: visual.accent }}
-                    >
-                      {visual.icon}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex items-center justify-between gap-3">
-                        <h4 className="truncate text-lg font-black tracking-[-0.03em]" style={{ color: "var(--foreground)" }}>
-                          {getSessionTitle(session)}
-                        </h4>
-                        <span className="shrink-0 text-xs font-bold" style={{ color: "var(--muted)" }}>
-                          {Math.max(session.messages.length * 3, 12)}m
-                        </span>
+                    <div className="flex gap-3 sm:gap-4 min-w-0">
+                      <div
+                        className="flex h-11 sm:h-14 w-11 sm:w-14 shrink-0 items-center justify-center rounded-full"
+                        style={{ backgroundColor: visual.soft, color: visual.accent }}
+                      >
+                        {visual.icon}
                       </div>
-                      <p className="line-clamp-2 text-sm italic leading-6" style={{ color: "var(--muted)" }}>
-                        {session.messages.find((message) => message.role === "assistant")?.content || "Open the session to continue your guided dialogue."}
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-0.5 sm:mb-1 flex items-center justify-between gap-2 sm:gap-3">
+                          <h4 className="truncate text-base sm:text-lg font-black tracking-[-0.03em]" style={{ color: "var(--foreground)" }}>
+                            {getSessionTitle(session)}
+                          </h4>
+                          <span className="shrink-0 text-[10px] sm:text-xs font-bold whitespace-nowrap" style={{ color: "var(--muted)" }}>
+                            {Math.max(session.messages.length * 3, 12)}m
+                          </span>
+                        </div>
+                        <p className="line-clamp-1 sm:line-clamp-2 text-xs sm:text-sm italic leading-5 sm:leading-6" style={{ color: "var(--muted)" }}>
+                          {session.messages.find((message) => message.role === "assistant")?.content || "Open to continue."}
+                        </p>
+                      </div>
                     </div>
                   </Link>
                 );
@@ -334,25 +338,25 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="lg:col-span-4 flex flex-col gap-6">
-          <div className="panel-surface relative overflow-hidden rounded-[2rem] p-8">
+        <section className="lg:col-span-4 flex flex-col gap-3 sm:gap-4 lg:gap-5 lg:gap-6">
+          <div className="panel-surface relative overflow-hidden rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 lg:p-8 bounce-enter" style={{ animationDelay: '240ms' }}>
             <div
-              className="absolute -right-8 -top-8 h-28 w-28 rounded-full blur-3xl"
+              className="absolute -right-6 sm:-right-8 -top-6 sm:-top-8 h-20 sm:h-28 w-20 sm:w-28 rounded-full blur-2xl sm:blur-3xl"
               style={{ backgroundColor: recommendedVisual.soft }}
             />
             <div className="relative">
-              <div className="mb-4 text-xs font-black uppercase tracking-[0.24em]" style={{ color: recommendedVisual.accent }}>
-                Recommended for you
+              <div className="mb-2 sm:mb-4 text-[8px] sm:text-xs font-black uppercase tracking-[0.24em]" style={{ color: recommendedVisual.accent }}>
+                Recommended
               </div>
-              <h3 className="text-3xl font-black tracking-[-0.04em]" style={{ color: "var(--foreground)" }}>
+              <h3 className="text-2xl sm:text-3xl font-black tracking-[-0.04em] line-clamp-2" style={{ color: "var(--foreground)" }}>
                 {recommendedSubject.name}
               </h3>
-              <p className="mt-3 text-sm leading-7" style={{ color: "var(--muted)" }}>
-                Re-enter this subject and let the Socratic loop pick up from your current level of understanding.
+              <p className="mt-2 sm:mt-3 text-xs sm:text-sm leading-6 sm:leading-7" style={{ color: "var(--muted)" }}>
+                Re-enter and let the Socratic loop continue.
               </p>
               <Link
                 href={`/learn/${recommendedSubject.slug}`}
-                className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-black"
+                className="mt-6 sm:mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-black mobile-tap-feedback"
                 style={{
                   background: recommendedVisual.gradient,
                   color: "var(--foreground)",
@@ -360,35 +364,36 @@ export default function DashboardPage() {
                 }}
               >
                 Jump Back In
-                <Play size={16} />
+                <Play size={14} className="sm:w-4 sm:h-4" />
               </Link>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {miniSubjects.map((subject) => {
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 stagger-list">
+            {miniSubjects.map((subject, idx) => {
               const visual = getSubjectVisual(subject.slug);
               const completion = Math.max(35, 80 - sessions.filter((session) => session.subject === subject.slug).length * 7);
               return (
                 <Link
                   key={subject.slug}
                   href={`/learn/${subject.slug}`}
-                  className="interactive-card panel-surface rounded-[1.5rem] p-5"
+                  className="interactive-card panel-surface rounded-xl sm:rounded-[1.5rem] p-3 sm:p-5 mobile-tap-feedback"
+                  style={{ animationDelay: `${300 + idx * 60}ms` }}
                 >
-                  <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: visual.soft, color: visual.accent }}>
+                  <div className="mb-3 inline-flex h-9 sm:h-11 w-9 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl" style={{ backgroundColor: visual.soft, color: visual.accent }}>
                     {visual.icon}
                   </div>
-                  <h4 className="text-lg font-black tracking-[-0.03em]" style={{ color: "var(--foreground)" }}>
+                  <h4 className="text-sm sm:text-lg font-black tracking-[-0.03em] line-clamp-1" style={{ color: "var(--foreground)" }}>
                     {subject.name}
                   </h4>
-                  <div className="mt-4 flex items-center gap-2">
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ backgroundColor: "var(--border)" }}>
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="h-1 sm:h-1.5 flex-1 overflow-hidden rounded-full" style={{ backgroundColor: "var(--border)" }}>
                       <div
-                        className="h-full rounded-full"
+                        className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${completion}%`, backgroundColor: visual.accent }}
                       />
                     </div>
-                    <span className="text-[10px] font-black" style={{ color: "var(--muted)" }}>
+                    <span className="text-[8px] sm:text-[10px] font-black" style={{ color: "var(--muted)" }}>
                       {completion}%
                     </span>
                   </div>
@@ -397,46 +402,46 @@ export default function DashboardPage() {
             })}
           </div>
 
-          <div className="panel-muted rounded-[1.5rem] p-5">
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--accent-soft)", color: "var(--accent)" }}>
-                <BrainCircuit size={18} />
+          <div className="panel-muted rounded-xl sm:rounded-[1.5rem] p-4 sm:p-5 bounce-enter" style={{ animationDelay: '360ms' }}>
+            <div className="mb-3 flex items-center gap-2 sm:gap-3">
+              <div className="flex h-9 sm:h-10 w-9 sm:w-10 items-center justify-center rounded-lg sm:rounded-2xl" style={{ backgroundColor: "var(--accent-soft)", color: "var(--accent)" }}>
+                <BrainCircuit size={16} className="sm:w-4.5 sm:h-4.5" />
               </div>
-              <div>
-                <div className="text-sm font-black" style={{ color: "var(--foreground)" }}>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs sm:text-sm font-black" style={{ color: "var(--foreground)" }}>
                   Mentor Pulse
                 </div>
-                <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "var(--muted)" }}>
+                <div className="text-[8px] uppercase tracking-[0.2em]" style={{ color: "var(--muted)" }}>
                   Live insight
                 </div>
               </div>
             </div>
-            <div className="space-y-2 text-sm leading-6" style={{ color: "var(--muted)" }}>
-              <div className="flex items-center gap-2">
-                <Clock3 size={14} />
-                <span>{dashboardStats.streakDays} day learning streak</span>
+            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm leading-5 sm:leading-6" style={{ color: "var(--muted)" }}>
+              <div className="flex items-center gap-2 min-w-0">
+                <Clock3 size={12} className="shrink-0 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">{dashboardStats.streakDays} day streak</span>
               </div>
-              <div className="flex items-center gap-2">
-                <BookOpen size={14} />
-                <span>{userSubjects.length} subjects ready to study</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <BookOpen size={12} className="shrink-0 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">{userSubjects.length} subjects ready</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Share2 size={14} />
-                <span>{dashboardStats.sharedCount} shared sessions in your feed</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <Share2 size={12} className="shrink-0 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">{dashboardStats.sharedCount} shared sessions</span>
               </div>
             </div>
           </div>
         </section>
       </div>
 
-      <nav className="fixed bottom-5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-6 rounded-full px-6 py-4 glass lg:hidden">
-        <Link href="/dashboard" style={{ color: "var(--accent)" }}>
+      <nav className="safe-bottom fixed bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-4 sm:gap-6 rounded-full px-4 sm:px-6 py-3 sm:py-4 glass lg:hidden mobile-tap-feedback slide-up-enter">
+        <Link href="/dashboard" style={{ color: "var(--accent)" }} className="transition-colors">
           <Sparkles size={20} />
         </Link>
-        <Link href="/learn" style={{ color: "var(--muted)" }}>
+        <Link href="/learn" style={{ color: "var(--muted)" }} className="transition-colors hover:text-[var(--foreground)]">
           <BookOpen size={20} />
         </Link>
-        <Link href="/progress" style={{ color: "var(--muted)" }}>
+        <Link href="/progress" style={{ color: "var(--muted)" }} className="transition-colors hover:text-[var(--foreground)]">
           <History size={20} />
         </Link>
       </nav>

@@ -11,7 +11,9 @@ export default function HomePage() {
   const cursorRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef({ x: -100, y: -100 });
   const positionRef = useRef({ x: -100, y: -100 });
+  const velocityRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef<number | null>(null);
+  const timeRef = useRef(0);
 
   useEffect(() => {
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -21,16 +23,38 @@ export default function HomePage() {
       const el = cursorRef.current;
       if (!el) return;
 
-      positionRef.current.x += (targetRef.current.x - positionRef.current.x) * 0.22;
-      positionRef.current.y += (targetRef.current.y - positionRef.current.y) * 0.22;
+      timeRef.current += 0.016; // ~60fps
 
+      // Smoother easing with slight lag for floating feel
+      const easing = 0.12;
       const dx = targetRef.current.x - positionRef.current.x;
-      const tilt = Math.max(-14, Math.min(14, dx * 0.35));
-      const scale = 1 + Math.min(0.08, Math.abs(dx) * 0.008);
+      const dy = targetRef.current.y - positionRef.current.y;
 
-      el.style.transform = `translate3d(${positionRef.current.x}px, ${positionRef.current.y}px, 0)`;
+      // Add velocity for momentum
+      velocityRef.current.x += (dx * easing - velocityRef.current.x) * 0.3;
+      velocityRef.current.y += (dy * easing - velocityRef.current.y) * 0.3;
+
+      positionRef.current.x += velocityRef.current.x;
+      positionRef.current.y += velocityRef.current.y;
+
+      // Subtle organic drift based on time
+      const driftX = Math.sin(timeRef.current * 1.5) * 2;
+      const driftY = Math.cos(timeRef.current * 1.2) * 3;
+
+      // Tilt based on horizontal velocity
+      const tilt = Math.max(-18, Math.min(18, velocityRef.current.x * 2.5));
+
+      // Scale based on speed
+      const speed = Math.sqrt(velocityRef.current.x ** 2 + velocityRef.current.y ** 2);
+      const scale = 1 + Math.min(0.12, speed * 0.015);
+
+      // Slight vertical squash when moving fast
+      const squash = 1 - Math.min(0.08, speed * 0.008);
+
+      el.style.transform = `translate3d(${positionRef.current.x + driftX}px, ${positionRef.current.y + driftY}px, 0)`;
       el.style.setProperty("--ghost-tilt", `${tilt}deg`);
       el.style.setProperty("--ghost-scale", `${scale}`);
+      el.style.setProperty("--ghost-squash", `${squash}`);
 
       rafRef.current = requestAnimationFrame(animateCursor);
     };
@@ -61,7 +85,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen cursor-none [&_a]:cursor-none [&_button]:cursor-none bg-[radial-gradient(circle_at_top,var(--accent-soft),transparent_55%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,var(--accent-soft),transparent_55%)] md:cursor-none md:[&_a]:cursor-none md:[&_button]:cursor-none">
       <div
         ref={cursorRef}
         className="ghost-cursor pointer-events-none fixed left-0 top-0 z-[100] opacity-0 transition-opacity duration-150"
@@ -88,31 +112,31 @@ export default function HomePage() {
       </div>
       {showNavbar && (
         <header className="shutter-drop fixed top-0 z-50 w-full border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--background)_80%,black_20%)]/90 backdrop-blur-xl">
-          <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 md:px-8">
-            <div className="flex items-center gap-3">
-              <div className="h-2.5 w-2.5 rounded-full soft-pulse" style={{ backgroundColor: "var(--accent)" }} />
-              <div className="text-xl font-black tracking-tight md:text-2xl" style={{ color: "var(--foreground)" }}>
+          <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 sm:gap-3 px-3 py-2.5 sm:px-4 sm:py-3 md:px-8 md:py-4">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="h-2 sm:h-2.5 w-2 sm:w-2.5 rounded-full soft-pulse flex-shrink-0" style={{ backgroundColor: "var(--accent)" }} />
+              <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-black tracking-tight truncate" style={{ color: "var(--foreground)" }}>
                 Socratic <span style={{ color: "var(--accent)" }}>AI</span>
               </div>
             </div>
 
-            <div className="hidden items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-1 md:flex">
-              <Link href="/learn" className="nav-pill rounded-full px-3 py-1.5 text-sm font-bold uppercase tracking-wider text-[var(--muted)] hover:text-[var(--foreground)]">
+            <div className="hidden items-center gap-1 sm:gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-1.5 sm:px-2 py-1 md:flex">
+              <Link href="/learn" className="nav-pill rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--muted)] hover:text-[var(--foreground)] mobile-tap-feedback">
                 Learn
               </Link>
-              <Link href="/progress" className="nav-pill rounded-full px-3 py-1.5 text-sm font-bold uppercase tracking-wider text-[var(--muted)] hover:text-[var(--foreground)]">
+              <Link href="/progress" className="nav-pill rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--muted)] hover:text-[var(--foreground)] mobile-tap-feedback">
                 Progress
               </Link>
-              <Link href="/shared-topics" className="nav-pill rounded-full px-3 py-1.5 text-sm font-bold uppercase tracking-wider text-[var(--muted)] hover:text-[var(--foreground)]">
+              <Link href="/shared-topics" className="nav-pill rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--muted)] hover:text-[var(--foreground)] mobile-tap-feedback">
                 Community
               </Link>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Link href="/signin" className="button-ghost rounded-full px-5 py-2.5 text-base font-semibold" style={{ color: "var(--foreground)" }}>
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
+              <Link href="/signin" className="button-ghost hidden rounded-full px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 text-xs sm:text-sm md:text-base font-semibold sm:inline-flex mobile-tap-feedback" style={{ color: "var(--foreground)" }}>
                 signin
               </Link>
-              <Link href="/signup" className="button-accent rounded-full px-6 py-2.5 text-base font-black tracking-wide">
+              <Link href="/signup" className="button-accent rounded-full px-3 py-1.5 sm:px-4 sm:py-2 sm:px-6 sm:py-2.5 md:px-6 md:py-2.5 text-xs sm:text-sm md:text-base font-black tracking-wide mobile-tap-feedback">
                 Start Free
               </Link>
             </div>
@@ -120,7 +144,7 @@ export default function HomePage() {
         </header>
       )}
 
-      <main className="flex min-h-screen items-center justify-center px-4 py-8">
+      <main className="flex min-h-screen items-center justify-center px-2 sm:px-3 md:px-4 py-4 sm:py-6 md:py-8">
         <div className="w-full max-w-[1460px]">
           <ParticleLogo
             width={2500}

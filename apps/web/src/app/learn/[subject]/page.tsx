@@ -68,9 +68,7 @@ export default function ChatPage() {
   const [showShare, setShowShare] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ _id: string; name: string; email?: string }[]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(
-    () => typeof window === "undefined" || window.innerWidth >= 1024
-  );
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const activeChat = currentChat?.subject === subject ? currentChat : null;
@@ -130,6 +128,16 @@ export default function ChatPage() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [activeChat?.messages]);
+
+  useEffect(() => {
+    const updateSidebarState = () => {
+      setIsSidebarOpen(window.innerWidth >= 1024);
+    };
+
+    updateSidebarState();
+    window.addEventListener("resize", updateSidebarState);
+    return () => window.removeEventListener("resize", updateSidebarState);
+  }, []);
 
   if (authLoading || !user) {
     return (
@@ -231,7 +239,7 @@ export default function ChatPage() {
 
   return (
     <div
-      className="flex h-screen overflow-hidden"
+      className="relative flex min-h-screen overflow-hidden lg:h-screen"
       style={{ backgroundColor: "var(--background)" }}
     >
       <div className="relative flex h-full min-w-0 flex-grow flex-col">
@@ -242,7 +250,7 @@ export default function ChatPage() {
 
         {/* Header Section (Floating Navbar) */}
         <header className="sticky top-0 z-40 bg-[var(--background)]/80 backdrop-blur-xl border-b border-[var(--border)] transition-all">
-          <div className="mx-auto max-w-6xl flex shrink-0 items-center justify-between px-8 py-4">
+          <div className="mx-auto flex w-full max-w-6xl shrink-0 items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
@@ -338,7 +346,7 @@ export default function ChatPage() {
         {/* Chat Feed */}
         <div
           ref={scrollRef}
-          className="flex-grow overflow-y-auto custom-scrollbar px-4 md:px-8 py-10"
+          className="custom-scrollbar flex-grow overflow-y-auto px-3 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10"
         >
           <div className="mx-auto max-w-3xl space-y-12 pb-32">
             {activeChat && activeChat.messages.length > 0 && (
@@ -423,7 +431,7 @@ export default function ChatPage() {
         </div>
 
         {/* Input Dock */}
-        <div className="shrink-0 pb-10 px-4 md:px-8">
+        <div className="safe-bottom shrink-0 px-3 pb-4 sm:px-6 sm:pb-6 md:px-8 md:pb-10">
           <div className="mx-auto max-w-3xl relative">
             {error && (
               <div className="absolute -top-14 left-0 right-0 rounded-xl px-4 py-2 text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 mb-4 animate-in fade-in slide-in-from-bottom-2">
@@ -489,12 +497,24 @@ export default function ChatPage() {
         </div>
       </div>
 
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close history panel"
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-black/35 lg:hidden"
+        />
+      )}
+
       {/* History Archive Sidebar (Right) */}
       <aside
-        className={`flex shrink-0 flex-col overflow-hidden bg-[var(--background)] transition-all duration-500 ease-in-out ${isSidebarOpen ? "w-[340px] border-l border-[var(--border)]" : "w-0 border-l-0"
-          }`}
+        className={`fixed inset-y-0 right-0 z-50 flex w-[88vw] max-w-[340px] shrink-0 flex-col overflow-hidden bg-[var(--background)] transition-transform duration-300 ease-in-out lg:static lg:z-auto lg:w-auto lg:max-w-none lg:transition-all lg:duration-500 ${
+          isSidebarOpen
+            ? "translate-x-0 border-l border-[var(--border)] lg:w-[340px]"
+            : "translate-x-full border-l-0 lg:w-0"
+        }`}
       >
-        <div className="flex h-full w-[340px] flex-col p-6 overflow-y-auto custom-scrollbar space-y-8">
+        <div className="custom-scrollbar flex h-full w-full flex-col overflow-y-auto p-4 pt-6 sm:p-5 lg:w-[340px] lg:p-6 space-y-8">
           <div className="flex items-center justify-between sticky top-0 bg-[var(--background)] py-2 z-10 pointer-events-none">
             <div>
               <h2 className="font-bold tracking-tight">History</h2>
