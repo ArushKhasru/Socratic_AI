@@ -19,9 +19,15 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // Normalize origin helper
-const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, '');
+const normalizeOrigin = (origin: string) => origin.trim().toLowerCase().replace(/\/+$/, '');
+
+const defaultDevOrigins =
+  process.env.NODE_ENV === 'production'
+    ? []
+    : ['http://localhost:3000', 'http://localhost:3001'];
 
 const configuredOrigins = [
+  ...defaultDevOrigins,
   process.env.FRONTEND_URL,
   ...(process.env.FRONTEND_URLS || '')
     .split(',')
@@ -31,15 +37,31 @@ const configuredOrigins = [
   .filter((o): o is string => Boolean(o))
   .map(normalizeOrigin);
 
-const allowedOrigins = new Set<string>([
-  ...configuredOrigins,
-]);
+const allowedOrigins = new Set<string>(configuredOrigins.filter((origin) => !origin.includes('*')));
+const wildcardOriginPatterns = configuredOrigins
+  .filter((origin) => origin.includes('*'))
+  .map((origin) =>
+    new RegExp(`^${origin.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`)
+  );
+
+if (allowedOrigins.size || wildcardOriginPatterns.length) {
+  console.log('CORS allowlist configured:', [
+    ...Array.from(allowedOrigins.values()),
+    ...configuredOrigins.filter((origin) => origin.includes('*')),
+  ]);
+}
+
+const isAllowedOrigin = (origin: string) => {
+  const normalizedOrigin = normalizeOrigin(origin);
+  if (allowedOrigins.has(normalizedOrigin)) return true;
+  return wildcardOriginPatterns.some((pattern) => pattern.test(normalizedOrigin));
+};
 
 // ✅ CORS — must be first
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.has(normalizeOrigin(origin))) return callback(null, true);
+    if (isAllowedOrigin(origin)) return callback(null, true);
     console.warn('Blocked by CORS:', origin);
     return callback(new Error('Not allowed by CORS'));
   },

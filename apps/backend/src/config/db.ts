@@ -14,7 +14,9 @@ const connectDB = async () => {
     } else {
       console.error('An unknown error occurred during MongoDB connection.');
     }
-    process.exit(1);
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    }
   }
 };
 
