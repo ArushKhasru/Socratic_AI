@@ -3,7 +3,7 @@ import { CookieOptions, Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import { IUserDocument, UserModel } from '../models/User';
 import { signToken } from '../utils/jwt';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const AUTH_COOKIE_NAME = 'token';
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
@@ -88,11 +88,17 @@ const resolveFrontendUrl = (returnTo?: string) => {
 const encodeOAuthState = (returnTo: string) =>
   Buffer.from(JSON.stringify({ returnTo }), 'utf8').toString('base64url');
 
+const decodeBase64Url = (input: string) => {
+  const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4 || 4)) % 4);
+  return Buffer.from(padded, 'base64').toString('utf8');
+};
+
 const decodeOAuthState = (encodedState?: string) => {
   if (!encodedState) return undefined;
 
   try {
-    const parsed = JSON.parse(Buffer.from(encodedState, 'base64url').toString('utf8')) as {
+    const parsed = JSON.parse(decodeBase64Url(encodedState)) as {
       returnTo?: string;
     };
     return parsed.returnTo;
