@@ -18,8 +18,20 @@ const PORT = process.env.PORT || 5000;
 // Connect to Database
 connectDB();
 
+const stripWrappingQuotes = (value: string) =>
+  value.trim().replace(/^['"]+|['"]+$/g, '');
+
 // Normalize origin helper
-const normalizeOrigin = (origin: string) => origin.trim().toLowerCase().replace(/\/+$/, '');
+const normalizeOrigin = (origin: string) => {
+  const cleaned = stripWrappingQuotes(origin);
+  if (!cleaned) return '';
+
+  try {
+    return new URL(cleaned).origin.toLowerCase();
+  } catch {
+    return cleaned.toLowerCase().replace(/\/+$/, '');
+  }
+};
 
 const defaultDevOrigins =
   process.env.NODE_ENV === 'production'
