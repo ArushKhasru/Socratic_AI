@@ -7,8 +7,10 @@ const normalizeApiBaseUrl = (rawUrl?: string) => {
   return /\/api$/i.test(base) ? base : `${base}/api`;
 };
 
+export const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+
 const api = axios.create({
-  baseURL: normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL),
+  baseURL: apiBaseUrl,
   withCredentials: true,
 });
 

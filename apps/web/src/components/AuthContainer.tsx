@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import Script from "next/script";
+import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import AuthTabs from "@/components/AuthTabs";
@@ -16,40 +15,7 @@ import {
 } from "@/components/icons/AuthIcons";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useThemeStore } from "@/store/useThemeStore";
-import api from "@/lib/api";
-
-type GoogleCredentialResponse = {
-  credential?: string;
-  select_by?: string;
-};
-
-type GoogleButtonOptions = {
-  type?: "standard" | "icon";
-  theme?: "outline" | "filled_blue" | "filled_black";
-  size?: "large" | "medium" | "small";
-  text?: "signin_with" | "signup_with" | "continue_with" | "signin";
-  shape?: "rectangular" | "pill" | "circle" | "square";
-  logo_alignment?: "left" | "center";
-  width?: string | number;
-};
-
-declare global {
-  interface Window {
-    google?: {
-      accounts?: {
-        id?: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: GoogleCredentialResponse) => void;
-            ux_mode?: "popup" | "redirect";
-          }) => void;
-          renderButton: (parent: HTMLElement, options: GoogleButtonOptions) => void;
-          disableAutoSelect: () => void;
-        };
-      };
-    };
-  }
-}
+import api, { apiBaseUrl } from "@/lib/api";
 
 export default function AuthContainer() {
   const [name, setName] = useState("");
@@ -59,15 +25,13 @@ export default function AuthContainer() {
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
-  const googleButtonRef = useRef<HTMLDivElement>(null);
-  const googleInitializedRef = useRef(false);
 
   const { user, setUser } = useAuthStore();
   const hydrate = useThemeStore((state) => state.hydrate);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const mode: "signin" | "signup" = pathname === "/signup" ? "signup" : "signin";
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   useEffect(() => {
     hydrate();
@@ -79,66 +43,40 @@ export default function AuthContainer() {
     }
   }, [router, user]);
 
-  const handleGoogleCredential = useCallback(
-    async (credentialResponse: GoogleCredentialResponse) => {
-      if (!credentialResponse.credential) {
-        setError("Google sign-in did not return a credential.");
-        return;
-      }
-
-      setError("");
-      setGoogleLoading(true);
-
-      try {
-        const response = await api.post("/auth/google", {
-          credential: credentialResponse.credential,
-        });
-
-        if (response.data.success) {
-          setUser(response.data.data);
-          router.push("/dashboard");
-        }
-      } catch (err: unknown) {
-        const message = axios.isAxiosError(err)
-          ? err.response?.data?.error
-          : undefined;
-        setError(message || "Google sign-in failed.");
-      } finally {
-        setGoogleLoading(false);
-      }
-    },
-    [router, setUser]
-  );
-
-  const renderGoogleButton = useCallback(() => {
-    const googleId = window.google?.accounts?.id;
-    const buttonContainer = googleButtonRef.current;
-
-    if (!googleClientId || !googleId || !buttonContainer) return;
-
-    if (!googleInitializedRef.current) {
-      googleId.initialize({
-        client_id: googleClientId,
-        callback: handleGoogleCredential,
-        ux_mode: "popup",
-      });
-      googleInitializedRef.current = true;
-    }
-
-    buttonContainer.innerHTML = "";
-    googleId.renderButton(buttonContainer, {
-      theme: "outline",
-      size: "large",
-      text: mode === "signup" ? "signup_with" : "continue_with",
-      shape: "pill",
-      logo_alignment: "left",
-      width: Math.min(400, buttonContainer.clientWidth || 320),
-    });
-  }, [googleClientId, handleGoogleCredential, mode]);
-
   useEffect(() => {
-    renderGoogleButton();
-  }, [renderGoogleButton]);
+    const oauthError = searchParams.get("error");
+    if (!oauthError) return;
+
+    const oauthErrorMap: Record<string, string> = {
+      access_denied: "Google sign-in was cancelled.",
+      google_code_missing: "Google sign-in failed. Please try again.",
+      google_token_missing: "Google sign-in failed. Missing Google token.",
+      google_account_unverified: "Google account could not be verified.",
+      google_signin_failed: "Google sign-in failed.",
+      google_oauth_not_configured: "Google OAuth is not configured.",
+    };
+
+    setError(oauthErrorMap[oauthError] || "Google sign-in failed.");
+  }, [searchParams]);
+
+  const handleGoogleRedirect = useCallback(() => {
+    setError("");
+    setGoogleLoading(true);
+
+    try {
+      const normalizedBase = apiBaseUrl.replace(/\/+$/, "");
+      const startPath = `${normalizedBase}/auth/google/start`;
+      const startUrl = /^https?:\/\//i.test(startPath)
+        ? new URL(startPath)
+        : new URL(startPath, window.location.origin);
+
+      startUrl.searchParams.set("returnTo", `${window.location.origin}/dashboard`);
+      window.location.assign(startUrl.toString());
+    } catch {
+      setGoogleLoading(false);
+      setError("Google sign-in is unavailable right now.");
+    }
+  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -183,16 +121,6 @@ export default function AuthContainer() {
       className="flex min-h-screen"
       style={{ fontFamily: "Inter, Segoe UI, Arial, sans-serif", backgroundColor: "var(--background)", color: "var(--foreground)" }}
     >
-      {googleClientId && (
-        <Script
-          id="google-identity-services"
-          src="https://accounts.google.com/gsi/client"
-          strategy="afterInteractive"
-          onReady={renderGoogleButton}
-          onError={() => setError("Google sign-in is unavailable right now.")}
-        />
-      )}
-
       {/* ── Left panel (desktop only) ─────────────────────────── */}
       <section
         className="relative hidden min-h-screen w-1/2 items-center justify-center overflow-hidden px-12 py-16 lg:flex"
@@ -435,44 +363,20 @@ export default function AuthContainer() {
             </div>
 
             {/* Google */}
-            {googleClientId ? (
-              <div
-                className="relative flex min-h-11 w-full justify-center overflow-hidden rounded-full"
-                style={{
-                  backgroundColor: "color-mix(in srgb, var(--surface-alt) 78%, var(--surface))",
-                }}
-              >
-                <div
-                  ref={googleButtonRef}
-                  className={`flex w-full justify-center transition-opacity ${googleLoading ? "pointer-events-none opacity-40" : ""}`}
-                />
-                {googleLoading && (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center text-sm font-semibold"
-                    style={{
-                      backgroundColor: "color-mix(in srgb, var(--surface-alt) 78%, var(--surface))",
-                      color: "var(--foreground)",
-                    }}
-                  >
-                    Signing in...
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="flex w-full items-center justify-center gap-3 rounded-full px-4 py-3.5 text-sm font-semibold opacity-60"
-                style={{
-                  backgroundColor: "color-mix(in srgb, var(--surface-alt) 78%, var(--surface))",
-                  border: "1px solid color-mix(in srgb, var(--border) 76%, transparent)",
-                  color: "var(--foreground)",
-                }}
-              >
-                <GoogleMark className="h-5 w-5" />
-                <span>Continue with Google</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleGoogleRedirect}
+              disabled={googleLoading}
+              className="flex w-full items-center justify-center gap-3 rounded-full px-4 py-3.5 text-sm font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+              style={{
+                backgroundColor: "color-mix(in srgb, var(--surface-alt) 78%, var(--surface))",
+                border: "1px solid color-mix(in srgb, var(--border) 76%, transparent)",
+                color: "var(--foreground)",
+              }}
+            >
+              <GoogleMark className="h-5 w-5" />
+              <span>{googleLoading ? "Redirecting to Google..." : "Continue with Google"}</span>
+            </button>
           </form>
 
           {/* Footer */}

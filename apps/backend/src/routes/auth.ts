@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, signin, googleSignin, logout, getMe } from '../controllers/authController';
+import { signup, signin, googleSignin, googleAuthStart, googleCallback, logout, getMe } from '../controllers/authController';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
@@ -7,6 +7,8 @@ const router = Router();
 router.post('/signup', signup);
 router.post('/signin', signin);
 router.post('/google', googleSignin);
+router.get('/google/start', googleAuthStart);
+router.get('/callback', googleCallback);
 router.post('/logout', logout);
 router.get('/me', authMiddleware, getMe);
 
