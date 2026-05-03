@@ -18,31 +18,46 @@ const PORT = process.env.PORT || 5000;
 // Connect to Database
 connectDB();
 
-// Middleware
-const allowedOrigins = [
+// Normalize origin helper
+const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, '');
+
+const configuredOrigins = [
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
+]
+  .filter((o): o is string => Boolean(o))
+  .map(normalizeOrigin);
+
+const allowedOrigins = new Set<string>([
   'http://localhost:3000',
   'http://localhost:3001',
-  process.env.FRONTEND_URL
-].filter(Boolean);
+  ...configuredOrigins,
+]);
 
+// ✅ CORS — must be first
 app.use(cors({
   origin: (origin, callback) => {
-    // allow requests with no origin (like Postman)
     if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    console.log("Blocked by CORS:", origin); // debug
+    if (allowedOrigins.has(normalizeOrigin(origin))) return callback(null, true);
+    console.warn('Blocked by CORS:', origin);
     return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
 }));
 
+// ✅ Fix Google OAuth popup postMessage blocking
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  next();
+});
+
+// Body parsing
 app.use(express.json());
 app.use(cookieParser());
-
 
 // Routes
 app.use('/api/auth', authRoutes);

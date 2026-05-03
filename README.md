@@ -305,6 +305,7 @@ Typical values used by the code:
 - Web Google client ID: `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 - Backend Google client ID: `GOOGLE_CLIENT_ID`
 - Optional comma-separated backend Google client IDs: `GOOGLE_CLIENT_IDS`
+- Backend CORS origin: `FRONTEND_URL` (or comma-separated `FRONTEND_URLS` for multiple origins)
 - Backend tutor service URL: `PYTHON_SERVICE_URL`
 - Python service key: `groq_api`
 
