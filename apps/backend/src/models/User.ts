@@ -4,6 +4,8 @@ import { User } from '../types';
 
 export interface IUserDocument extends Omit<User, '_id'>, Document {
   password: string;
+  googleId?: string;
+  avatarUrl?: string;
   deviceTokens: string[];
   notificationsEnabled: boolean;
   streak: number;
@@ -14,8 +16,10 @@ export interface IUserDocument extends Omit<User, '_id'>, Document {
 const userSchema = new Schema<IUserDocument>(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
+    googleId: { type: String, unique: true, sparse: true },
+    avatarUrl: { type: String },
     deviceTokens: { type: [String], default: [] },
     notificationsEnabled: { type: Boolean, default: true },
     streak: { type: Number, default: 0 },

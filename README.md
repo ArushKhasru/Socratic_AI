@@ -295,14 +295,20 @@ The project expects environment configuration for:
 - MongoDB connection
 - JWT secret
 - frontend URL / CORS origin
+- Google OAuth client IDs
 - Python tutor service URL
 - Groq API key for the tutor service
 
 Typical values used by the code:
 
 - Web API base URL: `NEXT_PUBLIC_API_URL`
+- Web Google client ID: `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+- Backend Google client ID: `GOOGLE_CLIENT_ID`
+- Optional comma-separated backend Google client IDs: `GOOGLE_CLIENT_IDS`
 - Backend tutor service URL: `PYTHON_SERVICE_URL`
 - Python service key: `groq_api`
+
+For Google sign-in, configure the OAuth web client in Google Cloud Console with the web app origin, such as `http://localhost:3001` for local development and the deployed frontend URL for production. The frontend sends the Google ID token to `/api/auth/google`; the backend verifies it before issuing the app's JWT cookie.
 
 ## Why This Project Matters
 
