@@ -25,15 +25,21 @@ const getAuthCookieOptions = (): CookieOptions => {
 const getGoogleClientIds = () =>
   (process.env.GOOGLE_CLIENT_IDS || process.env.GOOGLE_CLIENT_ID || '')
     .split(',')
-    .map((clientId) => clientId.trim())
+    .map((clientId) => clientId.trim().replace(/^['"]+|['"]+$/g, ''))
     .filter(Boolean);
 
 const getGoogleOAuthConfig = () => {
-  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
-  const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || '').trim();
-  const redirectUri = (process.env.GOOGLE_REDIRECT_URI || '').trim();
+  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim().replace(/^['"]+|['"]+$/g, '');
+  const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || '').trim().replace(/^['"]+|['"]+$/g, '');
+  const redirectUri = (process.env.GOOGLE_REDIRECT_URI || '').trim().replace(/^['"]+|['"]+$/g, '');
 
   if (!clientId || !clientSecret || !redirectUri) {
+    return null;
+  }
+
+  try {
+    new URL(redirectUri);
+  } catch {
     return null;
   }
 
@@ -265,26 +271,28 @@ export const googleSignin = async (req: Request, res: Response) => {
 
 export const googleAuthStart = (req: Request, res: Response) => {
   const oauthClient = createGoogleOAuthClient();
+  const signinUrl = resolveFrontendUrl('/signin');
 
   if (!oauthClient) {
-    return res.status(500).json({
-      success: false,
-      error: 'Google OAuth redirect flow is not configured',
-    });
+    return res.redirect(withErrorParam(signinUrl, 'google_oauth_not_configured'));
   }
 
   const returnTo = readQueryString(req.query.returnTo);
   const safeReturnTo = resolveFrontendUrl(returnTo);
 
-  const authUrl = oauthClient.generateAuthUrl({
-    access_type: 'offline',
-    scope: GOOGLE_SCOPES,
-    include_granted_scopes: true,
-    prompt: 'select_account',
-    state: encodeOAuthState(safeReturnTo),
-  });
+  try {
+    const authUrl = oauthClient.generateAuthUrl({
+      access_type: 'offline',
+      scope: GOOGLE_SCOPES,
+      include_granted_scopes: true,
+      prompt: 'select_account',
+      state: encodeOAuthState(safeReturnTo),
+    });
 
-  return res.redirect(authUrl);
+    return res.redirect(authUrl);
+  } catch {
+    return res.redirect(withErrorParam(signinUrl, 'google_signin_failed'));
+  }
 };
 
 export const googleCallback = async (req: Request, res: Response) => {
