@@ -301,11 +301,11 @@ The project expects environment configuration for:
 
 Typical values used by the code:
 
-- Web API base URL: `NEXT_PUBLIC_API_URL`
+- Web API base URL: `NEXT_PUBLIC_API_URL` (use backend URL; `/api` suffix is optional)
 - Web Google client ID: `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 - Backend Google client ID: `GOOGLE_CLIENT_ID`
 - Optional comma-separated backend Google client IDs: `GOOGLE_CLIENT_IDS`
-- Backend CORS origin: `FRONTEND_URL` (or comma-separated `FRONTEND_URLS` for multiple origins)
+- Backend CORS origin: `FRONTEND_URL` (or comma-separated `FRONTEND_URLS` for multiple origins, including deployed Vercel frontend URLs)
 - Backend tutor service URL: `PYTHON_SERVICE_URL`
 - Python service key: `groq_api`
 

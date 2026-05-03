@@ -32,8 +32,6 @@ const configuredOrigins = [
   .map(normalizeOrigin);
 
 const allowedOrigins = new Set<string>([
-  'http://localhost:3000',
-  'http://localhost:3001',
   ...configuredOrigins,
 ]);
 
@@ -49,7 +47,7 @@ app.use(cors({
 }));
 
 // ✅ Fix Google OAuth popup postMessage blocking
-app.use((req, res, next) => {
+app.use((_req, res, next) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
   next();
@@ -59,23 +57,33 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/sessions', sessionRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/notifications', notificationRoutes);
+const mountRoutes = (prefix = '') => {
+  app.use(`${prefix}/auth`, authRoutes);
+  app.use(`${prefix}/sessions`, sessionRoutes);
+  app.use(`${prefix}/chat`, chatRoutes);
+  app.use(`${prefix}/user`, userRoutes);
+  app.use(`${prefix}/notifications`, notificationRoutes);
+};
+
+// Support both /api/* and /* route prefixes for different deployment rewrites.
+mountRoutes('/api');
+mountRoutes('');
 
 // Health check
-app.get('/health', (req, res) => {
+const healthHandler = (_req: express.Request, res: express.Response) => {
   res.json({ status: 'OK', message: 'Socratic AI API is running' });
-});
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 // Error handling
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 export default app;
