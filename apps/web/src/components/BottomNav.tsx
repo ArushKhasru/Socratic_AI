@@ -4,10 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  LayoutDashboard, 
   BookOpen, 
-  TrendingUp, 
-  Users,
   Sparkles,
   History,
   Layers

@@ -16,7 +16,7 @@ export const createSession = async (req: Request, res: Response) => {
     });
 
     res.status(201).json({ success: true, data: session });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to create session' });
   }
 };
@@ -31,7 +31,7 @@ export const getSessions = async (req: Request, res: Response) => {
 
     const sessions = await SessionModel.find(filter).sort({ createdAt: -1 });
     res.json({ success: true, data: sessions });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to fetch sessions' });
   }
 };
@@ -46,7 +46,7 @@ export const getSessionById = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Session not found' });
     }
     res.json({ success: true, data: session });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to fetch session' });
   }
 };
@@ -71,7 +71,7 @@ export const endSession = async (req: Request, res: Response) => {
 
     await session.save();
     res.json({ success: true, data: session });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to end session' });
   }
 };

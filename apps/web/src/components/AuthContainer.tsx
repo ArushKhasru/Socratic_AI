@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
@@ -43,10 +43,8 @@ export default function AuthContainer() {
     }
   }, [router, user]);
 
-  useEffect(() => {
+  const oauthErrorMessage = useMemo(() => {
     const oauthError = searchParams.get("error");
-    if (!oauthError) return;
-
     const oauthErrorMap: Record<string, string> = {
       access_denied: "Google sign-in was cancelled.",
       google_code_missing: "Google sign-in failed. Please try again.",
@@ -56,8 +54,10 @@ export default function AuthContainer() {
       google_oauth_not_configured: "Google OAuth is not configured.",
     };
 
-    setError(oauthErrorMap[oauthError] || "Google sign-in failed.");
+    return oauthError ? oauthErrorMap[oauthError] || "Google sign-in failed." : "";
   }, [searchParams]);
+
+  const visibleError = error || oauthErrorMessage;
 
   const handleGoogleRedirect = useCallback(() => {
     setError("");
@@ -324,7 +324,7 @@ export default function AuthContainer() {
 
             {/* Error */}
             <AnimatePresence>
-              {error && (
+              {visibleError && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -336,7 +336,7 @@ export default function AuthContainer() {
                     color: "#ffb4ab",
                   }}
                 >
-                  {error}
+                  {visibleError}
                 </motion.div>
               )}
             </AnimatePresence>

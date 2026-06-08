@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ChatModel } from '../models/Chat';
 import { UserModel } from '../models/User';
 
-const PYTHON_SERVICE_URL = process.env.PYTHON_SERVICE_URL;
+const getPythonServiceUrl = () => (process.env.PYTHON_SERVICE_URL || '').trim().replace(/\/+$/, '');
 
 // Start or resume a chat for a subject
 export const startChat = async (req: Request, res: Response) => {
@@ -49,6 +49,15 @@ export const sendMessage = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Message content is required' });
     }
 
+    const pythonServiceUrl = getPythonServiceUrl();
+    if (!pythonServiceUrl) {
+      return res.status(503).json({
+        success: false,
+        error: 'Tutor service is not configured',
+        details: 'Set PYTHON_SERVICE_URL in the backend environment.',
+      });
+    }
+
     const chat = await ChatModel.findOne({ 
       _id: chatId, 
       $or: [{ userId }, { 'collaborators.userId': userId, 'collaborators.access': 'write' }]
@@ -69,7 +78,7 @@ export const sendMessage = async (req: Request, res: Response) => {
     }));
 
     // Call Python FastAPI service
-    const pythonResponse = await fetch(`${PYTHON_SERVICE_URL}/chat`, {
+    const pythonResponse = await fetch(`${pythonServiceUrl}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -116,7 +125,7 @@ export const sendMessage = async (req: Request, res: Response) => {
     // Auto-generate topic if missing
     if (!chat.topic && !aiData.isIrrelevant) {
       try {
-        const topicResponse = await fetch(`${PYTHON_SERVICE_URL}/generate-topic`, {
+        const topicResponse = await fetch(`${pythonServiceUrl}/generate-topic`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: trimmedContent }),
@@ -141,9 +150,6 @@ export const sendMessage = async (req: Request, res: Response) => {
         if (!lastActivity) {
           user.streak = 1;
         } else {
-          const diffInMs = now.getTime() - lastActivity.getTime();
-          const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-          
           const lastActivityDate = new Date(lastActivity).setHours(0,0,0,0);
           const nowDate = new Date(now).setHours(0,0,0,0);
           const daysBetween = (nowDate - lastActivityDate) / (1000 * 60 * 60 * 24);
@@ -184,7 +190,7 @@ export const sendMessage = async (req: Request, res: Response) => {
       success: false,
       error: 'Failed to process message',
       details: isPythonUnavailable
-        ? `Tutor service is unavailable at ${PYTHON_SERVICE_URL}. Start the FastAPI service and try again.`
+        ? `Tutor service is unavailable at ${getPythonServiceUrl()}. Start the FastAPI service and try again.`
         : error.message,
     });
   }
@@ -208,7 +214,7 @@ export const getChats = async (req: Request, res: Response) => {
       .populate('collaborators.userId', 'name email')
       .sort({ updatedAt: -1 });
     res.json({ success: true, data: chats });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to fetch chats' });
   }
 };
@@ -227,7 +233,7 @@ export const getChatById = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Chat not found or access denied' });
     }
     res.json({ success: true, data: chat });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to fetch chat' });
   }
 };
@@ -243,7 +249,7 @@ export const deleteChat = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Chat not found' });
     }
     res.json({ success: true, message: 'Chat deleted successfully' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to delete chat' });
   }
 };
@@ -267,7 +273,7 @@ export const updateChatTopic = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Chat not found or permission denied' });
     }
     res.json({ success: true, data: chat });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to update chat topic' });
   }
 };
@@ -294,7 +300,7 @@ export const shareChat = async (req: Request, res: Response) => {
     await chat.save();
 
     res.json({ success: true, message: 'Chat shared successfully', data: chat });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to share chat' });
   }
 };
@@ -310,11 +316,14 @@ export const unshareChat = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Chat not found' });
     }
 
-    chat.collaborators = chat.collaborators.filter(c => c.userId._id.toString() !== targetUserId && c.userId.toString() !== targetUserId);
+    chat.collaborators = chat.collaborators.filter((collaborator) => {
+      const collaboratorUserId = collaborator.userId.toString();
+      return collaboratorUserId !== targetUserId;
+    });
     await chat.save();
 
     res.json({ success: true, message: 'Share access revoked', data: chat });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to revoke share access' });
   }
 };
@@ -334,7 +343,7 @@ export const revokeAllShares = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Chat not found' });
     }
     res.json({ success: true, message: 'All share access revoked', data: chat });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to revoke all share access' });
   }
 };
@@ -346,7 +355,7 @@ export const getSharedChats = async (req: Request, res: Response) => {
   try {
     const chats = await ChatModel.find({ 'collaborators.userId': userId }).sort({ updatedAt: -1 });
     res.json({ success: true, data: chats });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to fetch shared chats' });
   }
 };

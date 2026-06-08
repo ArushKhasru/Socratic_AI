@@ -22,7 +22,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
     (req as any).user = user;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ success: false, error: 'Invalid or expired token' });
   }
 };

@@ -10,7 +10,7 @@ export const registerToken = async (req: Request, res: Response) => {
       $addToSet: { deviceTokens: token }
     });
     res.json({ success: true, message: 'Push token registered' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to register token' });
   }
 };
@@ -24,7 +24,7 @@ export const unregisterToken = async (req: Request, res: Response) => {
       $pull: { deviceTokens: token }
     });
     res.json({ success: true, message: 'Push token removed' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to unregister token' });
   }
 };
@@ -38,7 +38,7 @@ export const updatePreferences = async (req: Request, res: Response) => {
       notificationsEnabled: enabled
     });
     res.json({ success: true, message: 'Preferences updated' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to update preferences' });
   }
 };

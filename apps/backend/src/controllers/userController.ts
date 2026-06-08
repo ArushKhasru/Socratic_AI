@@ -121,7 +121,7 @@ export const updateUserSubjects = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
     res.json({ success: true, data: user });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to update user subjects' });
   }
 };
@@ -141,7 +141,7 @@ export const searchUsers = async (req: Request, res: Response) => {
       _id: { $ne: userId }
     }).select('name email _id').limit(10);
     res.json({ success: true, data: users });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to search users' });
   }
 };
@@ -165,7 +165,7 @@ export const updateProfile = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
     res.json({ success: true, data: user });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Failed to update profile' });
   }
 };

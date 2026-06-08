@@ -5,7 +5,7 @@ export default [
     ignores: ["dist/**"],
   },
   {
-    files: ["src/**/*.ts"],
+    files: ["src/**/*.ts", "api/**/*.ts"],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 2020,

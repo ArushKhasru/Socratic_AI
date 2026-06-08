@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
-  Brain,
   Bot,
   Eye,
   History,

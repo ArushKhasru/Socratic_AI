@@ -208,7 +208,7 @@ export const signup = async (req: Request, res: Response) => {
       success: true,
       data: serializeUser(user),
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Server error during signup' });
   }
 };
@@ -234,7 +234,7 @@ export const signin = async (req: Request, res: Response) => {
       success: true,
       data: serializeUser(user),
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, error: 'Server error during signin' });
   }
 };
@@ -270,7 +270,7 @@ export const googleSignin = async (req: Request, res: Response) => {
       success: true,
       data: serializeUser(user),
     });
-  } catch (error) {
+  } catch {
     res.status(401).json({ success: false, error: 'Google sign-in failed' });
   }
 };

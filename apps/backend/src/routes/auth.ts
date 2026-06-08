@@ -8,6 +8,7 @@ router.post('/signup', signup);
 router.post('/signin', signin);
 router.post('/google', googleSignin);
 router.get('/google/start', googleAuthStart);
+router.get('/google/callback', googleCallback);
 router.get('/callback', googleCallback);
 // Backward-compatible alias for misconfigured redirect URIs like /auth/auth/callback.
 router.get('/auth/callback', googleCallback);

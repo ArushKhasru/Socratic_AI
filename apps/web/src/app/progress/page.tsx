@@ -10,12 +10,9 @@ import {
   Clock,
   ChevronRight,
   History,
-  LayoutDashboard,
   Brain,
-  Activity,
   Flame,
   ArrowLeft,
-  BookOpen,
 } from "lucide-react";
 
 interface WeeklyActivityPoint {
