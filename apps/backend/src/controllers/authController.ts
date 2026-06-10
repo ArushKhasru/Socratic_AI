@@ -113,6 +113,14 @@ const withErrorParam = (urlString: string, error: string) => {
   return url.toString();
 };
 
+const withAuthTokenFragment = (urlString: string, token: string) => {
+  const url = new URL(urlString);
+  const fragment = new URLSearchParams(url.hash.replace(/^#/, ''));
+  fragment.set('auth_token', token);
+  url.hash = fragment.toString();
+  return url.toString();
+};
+
 const readQueryString = (value: unknown) => {
   if (typeof value === 'string') return value;
   if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
@@ -132,6 +140,7 @@ const serializeUser = (user: IUserDocument) => ({
 const setSessionCookie = (res: Response, userId: unknown) => {
   const token = signToken({ id: userId });
   res.cookie(AUTH_COOKIE_NAME, token, getAuthCookieOptions());
+  return token;
 };
 
 const clearSessionCookie = (res: Response) => {
@@ -202,11 +211,12 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     const user = await UserModel.create({ name, email: normalizedEmail, password });
-    setSessionCookie(res, user._id);
+    const token = setSessionCookie(res, user._id);
 
     res.status(201).json({
       success: true,
       data: serializeUser(user),
+      token,
     });
   } catch {
     res.status(500).json({ success: false, error: 'Server error during signup' });
@@ -235,11 +245,12 @@ export const signin = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    setSessionCookie(res, user._id);
+    const token = setSessionCookie(res, user._id);
 
     res.json({
       success: true,
       data: serializeUser(user),
+      token,
     });
   } catch (error) {
     console.error('Signin failed:', error);
@@ -272,11 +283,12 @@ export const googleSignin = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Unable to verify Google account' });
     }
 
-    setSessionCookie(res, user._id);
+    const token = setSessionCookie(res, user._id);
 
     res.json({
       success: true,
       data: serializeUser(user),
+      token,
     });
   } catch {
     res.status(401).json({ success: false, error: 'Google sign-in failed' });
@@ -351,8 +363,8 @@ export const googleCallback = async (req: Request, res: Response) => {
       return res.redirect(withErrorParam(signinUrl, 'google_account_unverified'));
     }
 
-    setSessionCookie(res, user._id);
-    return res.redirect(returnTo);
+    const token = setSessionCookie(res, user._id);
+    return res.redirect(withAuthTokenFragment(returnTo, token));
   } catch {
     return res.redirect(withErrorParam(signinUrl, 'google_signin_failed'));
   }

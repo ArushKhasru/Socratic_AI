@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { User } from '@socratic-ai/types';
-import api from '@/lib/api';
+import axios from 'axios';
+import api, { setAuthToken } from '@/lib/api';
 
 interface AuthState {
   user: User | null;
@@ -14,7 +15,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: true,
-  setUser: (user) => set({ user }),
+  setUser: (user) => set({ user, loading: false }),
   checkAuth: async () => {
     try {
       const response = await api.get('/auth/me');
@@ -23,16 +24,21 @@ export const useAuthStore = create<AuthState>((set) => ({
       } else {
         set({ user: null, loading: false });
       }
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setAuthToken(null);
+      }
       set({ user: null, loading: false });
     }
   },
   logout: async () => {
     try {
       await api.post('/auth/logout');
-      set({ user: null });
     } catch (error) {
       console.error('Logout failed', error);
+    } finally {
+      setAuthToken(null);
+      set({ user: null, loading: false });
     }
   },
   updateProfile: async (data) => {

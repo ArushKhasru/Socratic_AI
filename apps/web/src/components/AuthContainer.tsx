@@ -15,7 +15,7 @@ import {
 } from "@/components/icons/AuthIcons";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useThemeStore } from "@/store/useThemeStore";
-import api, { apiBaseUrl } from "@/lib/api";
+import api, { apiBaseUrl, setAuthToken } from "@/lib/api";
 
 export default function AuthContainer() {
   const [name, setName] = useState("");
@@ -91,6 +91,7 @@ export default function AuthContainer() {
       const response = await api.post(endpoint, payload);
 
       if (response.data.success) {
+        setAuthToken(response.data.token || null);
         setUser(response.data.data);
         router.push("/dashboard");
       }

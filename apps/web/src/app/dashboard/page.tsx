@@ -70,16 +70,19 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
 
-    api.get("/chat").then((res) => {
-      if (res.data.success) {
-        setSessions(res.data.data);
-      }
-    });
-
-    api.get("/user/stats").then((res) => {
-      if (res.data.success) {
-        setStats(res.data.data);
-      }
+    void Promise.all([
+      api.get("/chat").then((res) => {
+        if (res.data.success) {
+          setSessions(res.data.data);
+        }
+      }),
+      api.get("/user/stats").then((res) => {
+        if (res.data.success) {
+          setStats(res.data.data);
+        }
+      }),
+    ]).catch((error) => {
+      console.error("Failed to load dashboard data", error);
     });
   }, [user]);
 
