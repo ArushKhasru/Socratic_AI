@@ -15,9 +15,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to Database
-connectDB();
-
 const stripWrappingQuotes = (value: string) =>
   value.trim().replace(/^['"]+|['"]+$/g, '');
 
@@ -91,6 +88,29 @@ app.use((_req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
+// Health check does not depend on MongoDB, which keeps deployment diagnostics available.
+const healthHandler = (_req: express.Request, res: express.Response) => {
+  res.json({ status: 'OK', message: 'Socratic AI API is running' });
+};
+
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
+
+// Vercel functions may start cold. Wait for the shared connection promise before
+// allowing handlers to execute database queries.
+app.use(async (_req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('MongoDB connection failed:', error);
+    res.status(503).json({
+      success: false,
+      error: 'Database unavailable. Check the backend MongoDB configuration.',
+    });
+  }
+});
+
 const mountRoutes = (prefix = '') => {
   app.use(`${prefix}/auth`, authRoutes);
   app.use(`${prefix}/sessions`, sessionRoutes);
@@ -102,14 +122,6 @@ const mountRoutes = (prefix = '') => {
 // Support both /api/* and /* route prefixes for different deployment rewrites.
 mountRoutes('/api');
 mountRoutes('');
-
-// Health check
-const healthHandler = (_req: express.Request, res: express.Response) => {
-  res.json({ status: 'OK', message: 'Socratic AI API is running' });
-};
-
-app.get('/health', healthHandler);
-app.get('/api/health', healthHandler);
 
 // Error handling
 app.use(errorHandler);

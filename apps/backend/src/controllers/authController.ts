@@ -217,6 +217,13 @@ export const signin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const normalizedEmail = normalizeEmail(email || '');
 
+  if (!normalizedEmail || typeof password !== 'string' || !password) {
+    return res.status(400).json({
+      success: false,
+      error: 'Email and password are required',
+    });
+  }
+
   try {
     const user = await UserModel.findOne({ email: normalizedEmail });
     if (!user) {
@@ -234,7 +241,8 @@ export const signin = async (req: Request, res: Response) => {
       success: true,
       data: serializeUser(user),
     });
-  } catch {
+  } catch (error) {
+    console.error('Signin failed:', error);
     res.status(500).json({ success: false, error: 'Server error during signin' });
   }
 };
