@@ -1,10 +1,10 @@
-from fastapi import FastAPI
+from functools import lru_cache
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from groq import Groq
 import os
 from dotenv import load_dotenv
-import uvicorn
 
 # ------------------------
 # load environment
@@ -12,12 +12,20 @@ import uvicorn
 
 load_dotenv()
 
-groq_api_key = os.getenv("groq_api")
+def get_groq_api_key():
+    return os.getenv("GROQ_API_KEY", "").strip().strip("\"'")
 
-if not groq_api_key:
-    raise ValueError("Please add GROQ API key in .env file")
 
-client = Groq(api_key=groq_api_key)
+@lru_cache(maxsize=1)
+def get_groq_client():
+    api_key = get_groq_api_key()
+    if not api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="GROQ_API_KEY is not configured for this deployment",
+        )
+
+    return Groq(api_key=api_key)
 
 # ------------------------
 # create app
@@ -61,6 +69,7 @@ class ChatResponse(BaseModel):
 # ------------------------
 
 def ask_ai(topic, history, question, reveal):
+    client = get_groq_client()
 
     # --------------------
     # REVEAL ANSWER MODE
@@ -190,7 +199,8 @@ def health():
 
     return {
 
-        "status": "ok"
+        "status": "ok",
+        "groqConfigured": bool(get_groq_api_key()),
     }
 
 
@@ -220,6 +230,7 @@ def chat(req: ChatRequest):
 @app.post("/generate-topic")
 
 def generate_topic(req: dict):
+    client = get_groq_client()
 
     message = req.get("message", "")
 
