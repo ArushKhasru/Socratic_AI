@@ -9,6 +9,7 @@
     "inlineSources": false,
     "isolatedModules": true,
     "moduleResolution": "node16",
+    "types": ["node"],
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
