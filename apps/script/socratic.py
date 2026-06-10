@@ -2,7 +2,8 @@ from functools import lru_cache
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from groq import Groq
+from groq import APIError, Groq
+import logging
 import os
 from dotenv import load_dotenv
 
@@ -11,6 +12,9 @@ from dotenv import load_dotenv
 # ------------------------
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
+
 
 def get_groq_api_key():
     return os.getenv("GROQ_API_KEY", "").strip().strip("\"'")
@@ -25,7 +29,24 @@ def get_groq_client():
             detail="GROQ_API_KEY is not configured for this deployment",
         )
 
-    return Groq(api_key=api_key)
+    return Groq(
+        api_key=api_key,
+        timeout=12.0,
+        max_retries=1,
+    )
+
+
+def create_completion(**kwargs):
+    try:
+        return get_groq_client().chat.completions.create(**kwargs)
+    except HTTPException:
+        raise
+    except APIError as error:
+        logger.exception("Groq request failed")
+        raise HTTPException(
+            status_code=502,
+            detail="AI provider request failed",
+        ) from error
 
 # ------------------------
 # create app
@@ -69,8 +90,6 @@ class ChatResponse(BaseModel):
 # ------------------------
 
 def ask_ai(topic, history, question, reveal):
-    client = get_groq_client()
-
     # --------------------
     # REVEAL ANSWER MODE
     # --------------------
@@ -150,7 +169,7 @@ Rules:
     # call groq model
     # --------------------
 
-    completion = client.chat.completions.create(
+    completion = create_completion(
 
         model="llama-3.1-8b-instant",
 
@@ -230,8 +249,6 @@ def chat(req: ChatRequest):
 @app.post("/generate-topic")
 
 def generate_topic(req: dict):
-    client = get_groq_client()
-
     message = req.get("message", "")
 
     if not message:
@@ -239,7 +256,7 @@ def generate_topic(req: dict):
         return {"topic": "New Session"}
 
 
-    completion = client.chat.completions.create(
+    completion = create_completion(
 
         model="llama-3.1-8b-instant",
 
