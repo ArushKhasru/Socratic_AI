@@ -134,7 +134,7 @@ export default function HomePage() {
 
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
               <Link href="/signin" className="button-ghost hidden rounded-full px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 text-xs sm:text-sm md:text-base font-semibold sm:inline-flex mobile-tap-feedback" style={{ color: "var(--foreground)" }}>
-                signin
+                Signin
               </Link>
               <Link href="/signup" className="button-accent rounded-full px-3 py-1.5 sm:px-4 sm:py-2 sm:px-6 sm:py-2.5 md:px-6 md:py-2.5 text-xs sm:text-sm md:text-base font-black tracking-wide mobile-tap-feedback">
                 Start Free
